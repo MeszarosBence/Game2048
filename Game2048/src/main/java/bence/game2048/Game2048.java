@@ -1,7 +1,5 @@
 package bence.game2048;
 
-import static org.mockito.Mockito.verify;
-
 import java.io.PrintStream;
 
 public class Game2048 {
@@ -21,16 +19,17 @@ public class Game2048 {
 	private static final String SPACE = " ";
 
 	PrintStream out;
+	int[][] content;
 
 	public void printTable() {
 		out.print(topBorderRow());    
-		out.print(contentRow());      
+		out.print(contentRow(content[0]));      
 		out.print(middleBorderRow()); 
-		out.print(contentRow());      
+		out.print(contentRow(content[1]));      
 		out.print(middleBorderRow()); 
-		out.print(contentRow());      
+		out.print(contentRow(content[2]));      
 		out.print(middleBorderRow()); 
-		out.print(contentRow());      
+		out.print(contentRow(content[3]));      
 		out.print(bottomBorderRow()); 
 	}
 
@@ -48,9 +47,16 @@ public class Game2048 {
 		return CELL_LEFT + print(3, print(4, HORIZONTAL) + CELL_MIDDLE) + print(4, HORIZONTAL) + CELL_RIGHT
 				+ System.lineSeparator();
 	}
-
-	private String contentRow() {
-		return VERTICAL + print(3, print(4, SPACE) + VERTICAL) + print(4, SPACE) + VERTICAL + System.lineSeparator();
+	
+	private String contentRow(int[] content) {
+		StringBuilder row = new StringBuilder(VERTICAL);
+		for (int i = 0; i < content.length; i++) {
+			row.append(printCell(content[i]));
+			row.append(VERTICAL);
+		}
+		row.append(System.lineSeparator());
+		
+		return row.toString();
 	}
 
 	private String print(int times, String character) {
@@ -59,6 +65,15 @@ public class Game2048 {
 			output.append(character);
 		}
 		return output.toString();
+	}
+	
+	private String printCell(int i) {
+		if (i < 2) return "    ";
+		if (i < 10 ) return "  " + i + " ";
+		if (i < 100) return " " + i + " ";
+		if (i < 1000) return " " + i;
+		
+		return Integer.toString(i);
 	}
 
 }
