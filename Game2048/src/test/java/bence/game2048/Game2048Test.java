@@ -36,14 +36,18 @@ public class Game2048Test {
 	
 	@Spy
 	private PrintStream out = new PrintStream(System.out);
+	InOrder inOrder = null;
 
 	Game2048 g = new Game2048();
 	
 	@Before
 	public void setup() {
 		g.out = out;
+		g.content = content;
+		inOrder = inOrder(out);
+		
 	}
-	
+
 	@Test
 	public void testName() throws Exception {
 		
@@ -53,17 +57,38 @@ public class Game2048Test {
 	public void testPrintTableWithoutContent() throws Exception {
 		
 		g.printTable();
-		InOrder inOrder = inOrder(out);
 		
 		inOrder.verify(out).print(topBorderRow());
-		inOrder.verify(out).print(contentRow());
+		inOrder.verify(out).print(contentRow(content[0]));
 		inOrder.verify(out).print(middleBorderRow());
-		inOrder.verify(out).print(contentRow());
+		inOrder.verify(out).print(contentRow(content[1]));
 		inOrder.verify(out).print(middleBorderRow());
-		inOrder.verify(out).print(contentRow());
+		inOrder.verify(out).print(contentRow(content[2]));
 		inOrder.verify(out).print(middleBorderRow());
-		inOrder.verify(out).print(contentRow());
+		inOrder.verify(out).print(contentRow(content[3]));
 		inOrder.verify(out).print(bottomBorderRow());
+		
+	}
+	
+	@Test
+	public void testPrintContentOneElement() throws Exception {
+		content[0][0] = 2;
+		
+		g.content = content;
+		
+		g.printTable();
+		
+		inOrder.verify(out).print(topBorderRow());
+		inOrder.verify(out).print(contentRow(content[0]));
+		inOrder.verify(out).print(middleBorderRow());
+		inOrder.verify(out).print(contentRow(content[1]));
+		inOrder.verify(out).print(middleBorderRow());
+		inOrder.verify(out).print(contentRow(content[2]));
+		inOrder.verify(out).print(middleBorderRow());
+		inOrder.verify(out).print(contentRow(content[3]));
+		inOrder.verify(out).print(bottomBorderRow());
+		
+		
 	}
 
 	private String topBorderRow() {
@@ -78,10 +103,26 @@ public class Game2048Test {
 		return CELL_LEFT + print(3, print(4, HORIZONTAL) + CELL_MIDDLE) + print(4, HORIZONTAL) + CELL_RIGHT + System.lineSeparator();
 	}
 
-	private String contentRow() {
-		return VERTICAL + print(3, print(4, SPACE) + VERTICAL) + print(4, SPACE) + VERTICAL + System.lineSeparator();
+	private String contentRow(int[] content) {
+		StringBuilder row = new StringBuilder(VERTICAL);
+		for (int i = 0; i < content.length; i++) {
+			row.append(printCell(content[i]));
+			row.append(VERTICAL);
+		}
+		row.append(System.lineSeparator());
+		
+		return row.toString();
 	}
+	
 
+	private String printCell(int i) {
+		if (i < 2) return "    ";
+		if (i < 10 ) return "  " + i + " ";
+		if (i < 100) return " " + i + " ";
+		if (i < 1000) return " " + i;
+		
+		return Integer.toString(i);
+	}
 
 	private String print(int times, String character) {
 		StringBuilder output = new StringBuilder();
