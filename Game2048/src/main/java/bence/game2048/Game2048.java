@@ -1,7 +1,10 @@
 package bence.game2048;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
+
+import biz.source_code.utils.RawConsoleInput;
 
 public class Game2048 {
 
@@ -20,10 +23,15 @@ public class Game2048 {
 	private static final String CELL_RIGHT = "\u2563";
 	private static final String SPACE = " ";
 	
-	private static final int LEFT = 57419;
-	private static final int RIGHT = 57421;
-	private static final int UP = 57416;
-	private static final int DOWN = 57424;
+	enum DIR {
+		UP, DOWN, LEFT, RIGHT
+	}
+
+
+	private static final int KEY_LEFT = 57419;
+	private static final int KEY_RIGHT = 57421;
+	private static final int KEY_UP = 57416;
+	private static final int KEY_DOWN = 57424;
 
 	PrintStream out;
 	int[][] table = new int[TABLE_SIZE][TABLE_SIZE];
@@ -88,37 +96,15 @@ public class Game2048 {
 		return new Cell(2, rand.nextInt(TABLE_SIZE), rand.nextInt(TABLE_SIZE));
 	}
 
-	public void start() {
+	public void next() {
 		Cell cell = getNextCell();
 		table[cell.getX()][cell.getY()] = cell.getValue();
 		printTable();
 		
 	}
-
-//	0 0 2 2
-//	0 0 0 2
-//  2 0 2 2
-
-	public void addLeft() {
-		for (int i = 0; i < table.length; i++)
-		for (int j = 0; j < table.length - 1; j++) {
-			if (table [i][j] == table[i][j + 1]) {
-				table[i][j] = 2 * table[i][j + 1];
-				table[i][j + 1] = 0;
-			}
-		}
-		
-	}
-	
-	//0 0 2 4
-	//0 0 2 4
-    //4 0 0 2
-	
 	
 	public void left() {
-		addLeft();
 		moveLeft();
-		
 	}
 
 	private void moveLeft() {
@@ -126,19 +112,92 @@ public class Game2048 {
 		for (int i = 0; i < table.length; i++)
 		for (int k = 0; k < table.length -  1; k++)
 		for (int j = 0; j < table.length - 1; j++) {
-			if (table[i][j] == 0) {
-				table[i][j] = table[i][j + 1];
-				table[i][j + 1] = 0;
+			if (isEmptyCell(j, i) || equalsNext(j, i, DIR.RIGHT)) {
+				addNext(j, i, DIR.RIGHT);
+			}
+		}
+	}
+	
+	private void moveUp() {
+
+		for (int i = 0; i < table.length; i++)
+		for (int k = 0; k < table.length -  1; k++)
+		for (int j = 0; j < table.length - 1; j++) {
+			if (isEmptyCell(i, j) || equalsNext(i, j, DIR.DOWN)) {
+				addNext(i, j, DIR.DOWN);
 			}
 		}
 	}
 	
 	private void moveRight() {
 
+		for (int i = 0; i < table.length; i++)
+		for (int k = 0; k < table.length -  1; k++)
+		for (int j = table.length - 1; j > 0; j--) {
+			if (isEmptyCell(j, i) || equalsNext(j, i, DIR.LEFT)) {
+				addNext(j, i, DIR.LEFT);
+			}
+		}
+	}
+	
+	private void moveDown() {
+
+		for (int i = 0; i < table.length; i++)
+		for (int k = 0; k < table.length -  1; k++)
+		for (int j = table.length - 1; j > 0; j--) {
+			if (isEmptyCell(i, j) || equalsNext(i, j, DIR.UP)) {
+				addNext(i, j, DIR.UP);
+			}
+		}
+	}
+
+	private void addNext(int i, int j, DIR direction) {
+		if (direction == DIR.DOWN) {
+			table[j][i] = table [j][i] + table[j + 1][i];
+			table[j + 1][i] = 0;
+		}
+		
+		if (direction == DIR.UP) {
+			table[j][i] = table [j][i] + table[j - 1][i];
+			table[j - 1][i] = 0;
+		}
+		
+		if (direction == DIR.RIGHT) {
+			table[j][i] = table [j][i] + table[j][i + 1];
+			table[j][i + 1] = 0;
+		}
+		
+		if (direction == DIR.LEFT) {
+			table[j][i] = table [j][i] + table[j][i - 1];
+			table[j][i - 1] = 0;
+		}
+		
+		
+	}
+
+	private boolean equalsNext(int column, int row, DIR direction) {
+		if (direction == DIR.DOWN)
+			return table [row][column] == table[row + 1][column];
+		if (direction == DIR.UP)
+			return table [row][column] == table[row - 1][column];
+		if (direction == DIR.RIGHT)
+			return table [row][column] == table[row][column + 1];
+		if (direction == DIR.LEFT)
+			return table [row][column] == table[row][column - 1];
+		return false;
+	}
+
+	private boolean isEmptyCell(int column, int row) {
+ 		return table[row][column] == 0;
+	}
+	
+	
+	private void moveRightOld() {
+
 		int i = 0;
 		for (int k = 0; k < table.length -  1; k++)
 		for (int j = table.length - 1; j > 0; j--) {
-			if (table[i][j] == 0) {
+			if (isEmptyCell(j, i)) {
 				table[i][j] = table[i][j -1];
 				table[i][j - 1] = 0;
 			}
@@ -147,6 +206,31 @@ public class Game2048 {
 
 	public void right() {
 		moveRight();
+	}
+
+	public void up() {
+		moveUp();
+	}
+
+	public void down() {
+		moveDown();
+		
+	}
+
+	public void start() throws IOException {
+		next();
+		processUserInput();
+	}
+
+	public int readFromConsole() throws IOException {
+		return RawConsoleInput.read(true);
+	}
+	
+	public void processUserInput() throws IOException  {
+		int input = readFromConsole();
+		if (input == KEY_LEFT) {
+			left();
+		}
 	}
 
 }
