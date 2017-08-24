@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
 
+import org.fusesource.jansi.AnsiConsole;
+
 import biz.source_code.utils.RawConsoleInput;
 
 public class Game2048 {
@@ -23,6 +25,8 @@ public class Game2048 {
 	private static final String CELL_RIGHT = "\u2563";
 	private static final String SPACE = " ";
 	
+	PrintStream out = new PrintStream(AnsiConsole.out);
+	
 	enum DIR {
 		UP, DOWN, LEFT, RIGHT
 	}
@@ -33,7 +37,6 @@ public class Game2048 {
 	private static final int KEY_UP = 57416;
 	private static final int KEY_DOWN = 57424;
 
-	PrintStream out;
 	int[][] table = new int[TABLE_SIZE][TABLE_SIZE];
 
 	public void printTable() {
@@ -99,8 +102,6 @@ public class Game2048 {
 	public void next() {
 		Cell cell = getNextCell();
 		table[cell.getX()][cell.getY()] = cell.getValue();
-		printTable();
-		
 	}
 	
 	public void left() {
@@ -191,19 +192,6 @@ public class Game2048 {
  		return table[row][column] == 0;
 	}
 	
-	
-	private void moveRightOld() {
-
-		int i = 0;
-		for (int k = 0; k < table.length -  1; k++)
-		for (int j = table.length - 1; j > 0; j--) {
-			if (isEmptyCell(j, i)) {
-				table[i][j] = table[i][j -1];
-				table[i][j - 1] = 0;
-			}
-		}
-	}
-
 	public void right() {
 		moveRight();
 	}
@@ -214,22 +202,40 @@ public class Game2048 {
 
 	public void down() {
 		moveDown();
-		
 	}
 
-	public void start() throws IOException {
+	public void start() throws GameInterruptedException {
 		next();
 		processUserInput();
 	}
 
-	public int readFromConsole() throws IOException {
-		return RawConsoleInput.read(true);
+	public int readFromConsole() throws GameInterruptedException {
+		int input = 0;
+		try {
+			input = RawConsoleInput.read(true);
+		} catch (IOException e) {
+			throw new GameInterruptedException(e);
+		}
+		return input;
 	}
 	
-	public void processUserInput() throws IOException  {
-		int input = readFromConsole();
-		if (input == KEY_LEFT) {
-			left();
+	public void processUserInput() throws GameInterruptedException  {
+		
+		while(true) {
+			switch (readFromConsole()) {
+				case KEY_LEFT: 
+					left();
+					break;
+				case KEY_RIGHT: 
+					right();
+					break;
+				case KEY_UP: 
+					up();
+					break;
+				case KEY_DOWN: 
+					down();
+					break;
+			}
 		}
 	}
 

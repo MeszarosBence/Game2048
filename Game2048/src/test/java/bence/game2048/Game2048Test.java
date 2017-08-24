@@ -135,8 +135,13 @@ public class Game2048Test {
 	
 	@Test
 	public void placeFirstCellRandomly() throws Exception {
-		
+		g = new Game2048() {
+			@Override
+			public void processUserInput() throws GameInterruptedException {
+			}
+		};
 		g.start();
+
 		int found = 0;
 		for (int i = 0; i < table.length; i++) {
 			for (int j = 0; j < table.length; j++) {
@@ -381,6 +386,7 @@ public class Game2048Test {
 	@Test
 	public void buttonLeft() throws Exception {
 		g = new Game2048() {
+			int numOfKeyStrokes = 0;
 			@Override
 			public void next() {
 				super.table[0][3] = 2;
@@ -388,14 +394,45 @@ public class Game2048Test {
 			
 			@Override
 			public int readFromConsole() {
+				if (numOfKeyStrokes++ > 0)
+					throw new GameInterruptedException("Game Over");
 				return KEY_LEFT;
 			}
 		};
 		
-		g.start();
+		try {
+			g.start();
+		} catch (Exception e) {}
 		assertThat(g.table[0][0], is(2));
+	}
+	
+	@Test
+	public void readMultipleKeyStrokes() throws Exception {
+		g = new Game2048() {
+			int[] keyStrokes = {KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP};
+			int key = 0;
+			
+			@Override
+			public int readFromConsole() {
+				if (key < keyStrokes.length)
+					return keyStrokes[key++];
+				else throw new GameInterruptedException("Game over");
+			}
+			
+			@Override
+			public void next() {
+				if (key == 0) {
+					table[0][3] = 2;
+				}
+			}
+		};
 		
-
+		try {
+			g.start();
+		} catch (Exception e) {}
+		
+		assertThat(g.table[0][0], is(0));
+		assertThat(g.table[0][3], is(2));
 	}
 
 	private void assertThatTablePrintedCorrectly() {
