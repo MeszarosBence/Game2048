@@ -68,7 +68,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testPrintTableWithoutContent() throws Exception {
+	public void printTableWithoutContent() throws Exception {
 		
 		g.printTable();
 		assertThatTablePrintedCorrectly();
@@ -76,7 +76,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testPrintContentOneElement() throws Exception {
+	public void printContentOneElement() throws Exception {
 		table[0][0] = 2;
 		g.table = table;
 
@@ -108,7 +108,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testPrintContentAllElements() throws Exception {
+	public void printContentAllElements() throws Exception {
 		table[0][0] = 2;
 		table[0][1] = 4;
 		table[0][2] = 8;
@@ -169,7 +169,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testMoveOneValueLeft() throws Exception {
+	public void moveOneValueLeft() throws Exception {
 		int randomValue = 2;
 		g.table[0][3] = randomValue;
 		g.printTable();
@@ -181,7 +181,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testMoveValuesLeftAndAddThemIfTheyAreEqual() throws Exception {
+	public void moveValuesLeftAndAddThemIfTheyAreEqual() throws Exception {
 		int randomValue = 2;
 		g.table[0][3] = randomValue;
 		g.table[0][2] = randomValue;
@@ -197,7 +197,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testMoveValuesLeftAndDontAddThemIfTheyAreNotEqual() throws Exception {
+	public void moveValuesLeftAndDontAddThemIfTheyAreNotEqual() throws Exception {
 		g.table[3][3] = 4;
 		g.table[3][2] = 2;
 		g.printTable();
@@ -210,7 +210,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testDontMoveValuesLeft() throws Exception {
+	public void dontMoveValuesLeft() throws Exception {
 		g.table[3][3] = 4;
 		g.table[3][2] = 2;
 		g.table[3][1] = 4;
@@ -227,7 +227,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testMoveMultipleRowsLeftAndAddValues() throws Exception {
+	public void moveMultipleRowsLeftAndAddValues() throws Exception {
 		g.table[3][3] = 2;
 		g.table[3][2] = 2;
 		g.table[2][3] = 2;
@@ -250,7 +250,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testMoveOneValueRight() throws Exception {
+	public void moveOneValueRight() throws Exception {
 		int randomValue = 2;
 		g.table[0][0] = randomValue;
 		g.printTable();
@@ -262,7 +262,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testAddAndMoveTwoValuesRight() throws Exception {
+	public void addAndMoveTwoValuesRight() throws Exception {
 		int randomValue = 2;
 		g.table[0][0] = randomValue;
 		g.table[0][2] = randomValue;
@@ -277,7 +277,7 @@ public class Game2048Test {
 	
 	
 	@Test
-	public void testMoveOneValueUp() throws Exception {
+	public void moveOneValueUp() throws Exception {
 		int randomValue = 2;
 		g.table[3][0] = randomValue;
 		g.printTable();
@@ -290,7 +290,7 @@ public class Game2048Test {
 	
 	
 	@Test
-	public void testMoveTwoValuesUp() throws Exception {
+	public void moveTwoValuesUp() throws Exception {
 		int randomValue = 2;
 		g.table[1][0] = randomValue;
 		g.table[3][0] = randomValue;
@@ -303,7 +303,7 @@ public class Game2048Test {
 	}
 	
 	@Test
-	public void testMoveThreeValuesUp() throws Exception {
+	public void moveThreeValuesUp() throws Exception {
 		g.table[1][0] = 2;
 		g.table[2][0] = 4;
 		g.table[3][0] = 8;
