@@ -46,6 +46,7 @@ public class Game2048Test {
 	private static final String CELL_RIGHT = "\u2563";
 	private static final String SPACE = " ";
 	private static final String ANSI_CLS = "\u001b[2J";
+	private static final String ANSI_HOME = "\u001b[H";
 	
 	private static final int KEY_LEFT = 57419;
 	private static final int KEY_RIGHT = 57421;
@@ -135,12 +136,7 @@ public class Game2048Test {
 	
 	@Test
 	public void placeFirstCellRandomly() throws Exception {
-		g = new Game2048() {
-			@Override
-			public void processUserInput() throws GameInterruptedException {
-			}
-		};
-		g.start();
+		startGameWithKeyStrokes(new int[] {});
 
 		int found = 0;
 		for (int i = 0; i < table.length; i++) {
@@ -385,31 +381,20 @@ public class Game2048Test {
 	
 	@Test
 	public void buttonLeft() throws Exception {
-		g = new Game2048() {
-			int numOfKeyStrokes = 0;
-			@Override
-			public void next() {
-				super.table[0][3] = 2;
-			}
-			
-			@Override
-			public int readFromConsole() {
-				if (numOfKeyStrokes++ > 0)
-					throw new GameInterruptedException("Game Over");
-				return KEY_LEFT;
-			}
-		};
-		
-		try {
-			g.start();
-		} catch (Exception e) {}
+		startGameWithKeyStrokes(new int[]{KEY_LEFT});
 		assertThat(g.table[0][0], is(2));
 	}
 	
 	@Test
 	public void readMultipleKeyStrokes() throws Exception {
+		startGameWithKeyStrokes(new int[] {KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP});
+		
+		assertThat(g.table[0][0], is(0));
+		assertThat(g.table[0][3], is(2));
+	}
+
+	private void startGameWithKeyStrokes(final int[] keyStrokes) {
 		g = new Game2048() {
-			int[] keyStrokes = {KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP};
 			int key = 0;
 			
 			@Override
@@ -430,12 +415,10 @@ public class Game2048Test {
 		try {
 			g.start();
 		} catch (Exception e) {}
-		
-		assertThat(g.table[0][0], is(0));
-		assertThat(g.table[0][3], is(2));
 	}
 
 	private void assertThatTablePrintedCorrectly() {
+		inOrder.verify(out).print(ANSI_CLS + ANSI_HOME);
 		inOrder.verify(out).print(topBorderRow());
 		inOrder.verify(out).print(contentRow(table[FIRST_ROW]));
 		inOrder.verify(out).print(middleBorderRow());

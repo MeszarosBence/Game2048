@@ -24,6 +24,8 @@ public class Game2048 {
 	private static final String CELL_LEFT = "\u2560";
 	private static final String CELL_RIGHT = "\u2563";
 	private static final String SPACE = " ";
+	private static final String ANSI_CLS = "\u001b[2J";
+	private static final String ANSI_HOME = "\u001b[H";
 	
 	PrintStream out = new PrintStream(AnsiConsole.out);
 	
@@ -40,6 +42,7 @@ public class Game2048 {
 	int[][] table = new int[TABLE_SIZE][TABLE_SIZE];
 
 	public void printTable() {
+		out.print(ANSI_CLS + ANSI_HOME);
 		out.print(topBorderRow());    
 		out.print(contentRow(table[0]));      
 		out.print(middleBorderRow()); 
@@ -102,6 +105,7 @@ public class Game2048 {
 	public void next() {
 		Cell cell = getNextCell();
 		table[cell.getX()][cell.getY()] = cell.getValue();
+		printTable();
 	}
 	
 	public void left() {
@@ -205,8 +209,12 @@ public class Game2048 {
 	}
 
 	public void start() throws GameInterruptedException {
-		next();
-		processUserInput();
+		while(true) {
+			next();
+			printTable();
+			processUserInput();
+			printTable();
+		}
 	}
 
 	public int readFromConsole() throws GameInterruptedException {
@@ -221,7 +229,6 @@ public class Game2048 {
 	
 	public void processUserInput() throws GameInterruptedException  {
 		
-		while(true) {
 			switch (readFromConsole()) {
 				case KEY_LEFT: 
 					left();
@@ -236,7 +243,6 @@ public class Game2048 {
 					down();
 					break;
 			}
-		}
 	}
 
 }
