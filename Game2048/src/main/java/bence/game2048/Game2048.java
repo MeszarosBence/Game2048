@@ -11,23 +11,7 @@ import biz.source_code.utils.RawConsoleInput;
 public class Game2048 {
 
 	private static final int TABLE_SIZE = 4;
-	private static final String HORIZONTAL = "\u2550";
-	private static final String VERTICAL = "\u2551";
-	private static final String UPPER_LEFT = "\u2554";
-	private static final String UPPER_RIGHT = "\u2557";
-	private static final String LOWER_LEFT = "\u255A";
-	private static final String LOWER_RIGHT = "\u255D";
-	private static final String BORDER_TOP = "\u2566";
-	private static final String BORDER_BOTTOM = "\u2569";
-	private static final String CELL_DOWN = "\u2569";
-	private static final String CELL_MIDDLE = "\u256C";
-	private static final String CELL_LEFT = "\u2560";
-	private static final String CELL_RIGHT = "\u2563";
-	private static final String SPACE = " ";
-	private static final String ANSI_CLS = "\u001b[2J";
-	private static final String ANSI_HOME = "\u001b[H";
 	
-	PrintStream out = new PrintStream(AnsiConsole.out);
 	
 	enum DIR {
 		UP, DOWN, LEFT, RIGHT
@@ -40,61 +24,11 @@ public class Game2048 {
 	private static final int KEY_DOWN = 57424;
 
 	int[][] table = new int[TABLE_SIZE][TABLE_SIZE];
+	private Grid grid;
 
-	public void printTable() {
-		out.print(ANSI_CLS + ANSI_HOME);
-		out.print(topBorderRow());    
-		out.print(contentRow(table[0]));      
-		out.print(middleBorderRow()); 
-		out.print(contentRow(table[1]));      
-		out.print(middleBorderRow()); 
-		out.print(contentRow(table[2]));      
-		out.print(middleBorderRow()); 
-		out.print(contentRow(table[3]));      
-		out.print(bottomBorderRow()); 
-	}
-
-	private String topBorderRow() {
-		return UPPER_LEFT + print(3, print(4, HORIZONTAL) + BORDER_TOP) + print(4, HORIZONTAL) + UPPER_RIGHT
-				+ System.lineSeparator();
-	}
-
-	private String bottomBorderRow() {
-		return LOWER_LEFT + print(3, print(4, HORIZONTAL) + BORDER_BOTTOM) + print(4, HORIZONTAL) + LOWER_RIGHT
-				+ System.lineSeparator();
-	}
-
-	private String middleBorderRow() {
-		return CELL_LEFT + print(3, print(4, HORIZONTAL) + CELL_MIDDLE) + print(4, HORIZONTAL) + CELL_RIGHT
-				+ System.lineSeparator();
-	}
 	
-	private String contentRow(int[] content) {
-		StringBuilder row = new StringBuilder(VERTICAL);
-		for (int i = 0; i < content.length; i++) {
-			row.append(printCell(content[i]));
-			row.append(VERTICAL);
-		}
-		row.append(System.lineSeparator());
-		
-		return row.toString();
-	}
-
-	private String print(int times, String character) {
-		StringBuilder output = new StringBuilder();
-		for (int i = 0; i < times; i++) {
-			output.append(character);
-		}
-		return output.toString();
-	}
-	
-	private String printCell(int i) {
-		if (i < 2) return "    ";
-		if (i < 10 ) return "  " + i + " ";
-		if (i < 100) return " " + i + " ";
-		if (i < 1000) return " " + i;
-		
-		return Integer.toString(i);
+	public void setGrid(Grid grid) {
+		this.grid = grid;
 	}
 
 	private Cell getNextCell() {
@@ -132,7 +66,7 @@ public class Game2048 {
 	public void next() {
 		Cell cell = getNextCell();
 		table[cell.getY()][cell.getX()] = cell.getValue();
-		printTable();
+		grid.display();
 	}
 	
 	public void left() {
@@ -249,9 +183,9 @@ public class Game2048 {
 	public void start() throws GameInterruptedException {
 		while(true) {
 			next();
-			printTable();
+			grid.display();
 			processUserInput();
-			printTable();
+			grid.display();
 		}
 	}
 

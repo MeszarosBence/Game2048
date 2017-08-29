@@ -67,17 +67,18 @@ public class Game2048Test {
 	InOrder inOrder = null;
 
 	Game2048 g = new Game2048();
-	
+	ConsoleGrid grid = new ConsoleGrid(table);
 	@Before
 	public void setup() {
-		g.out = out;
+		grid.setOutput(out);
+		g.setGrid(grid);
 		inOrder = inOrder(out);
 	}
 	
 	@Test
 	public void printTableWithoutContent() throws Exception {
 		
-		g.printTable();
+		grid.display();
 		assertThatTablePrintedCorrectly();
 		
 	}
@@ -87,7 +88,7 @@ public class Game2048Test {
 		table[0][0] = 2;
 		g.table = table;
 
-		g.printTable();
+		grid.display();
 		
 		assertThatTablePrintedCorrectly();
 		
@@ -99,7 +100,7 @@ public class Game2048Test {
 		table[0][0] = 2;
 		g.table = table;
 
-		g.printTable();
+		grid.display();
 		
 //		Thread.sleep(500);  //In order to verify it visually
 		
@@ -108,7 +109,7 @@ public class Game2048Test {
 		
 		table[0][0] = 0;
 		table[0][1] = 2;
-		g.printTable();
+		grid.display();
 		
 //		Thread.sleep(500); //In order to verify it visually
 		assertThatTablePrintedCorrectly();
@@ -134,7 +135,7 @@ public class Game2048Test {
 		table[3][3] = 64;
 		g.table = table;
 		
-		g.printTable();
+		grid.display();
 		
 		assertThatTablePrintedCorrectly();
 		
@@ -146,7 +147,7 @@ public class Game2048Test {
 
 		assertThat(countCells(), is(1));
 		
-		g.printTable();
+		grid.display();
 		
 	}
 
@@ -178,12 +179,12 @@ public class Game2048Test {
 	public void moveOneValueLeft() throws Exception {
 		int randomValue = 2;
 		g.table[0][3] = randomValue;
-		g.printTable();
+		grid.display();
 		
 		g.left();
 		
 		assertThat(g.table[0][0], is(randomValue));
-		g.printTable();
+		grid.display();
 	}
 	
 	@Test
@@ -191,7 +192,7 @@ public class Game2048Test {
 		int randomValue = 2;
 		g.table[0][3] = randomValue;
 		g.table[0][2] = randomValue;
-		g.printTable();
+		grid.display();
 		
 		g.left();
 		
@@ -199,20 +200,20 @@ public class Game2048Test {
 		assertThat(g.table[0][1], is(0));
 		assertThat(g.table[0][2], is(0));
 		assertThat(g.table[0][3], is(0));
-		g.printTable();
+		grid.display();
 	}
 	
 	@Test
 	public void moveValuesLeftAndDontAddThemIfTheyAreNotEqual() throws Exception {
 		g.table[3][3] = 4;
 		g.table[3][2] = 2;
-		g.printTable();
+		grid.display();
 		
 		g.left();
 		
 		assertThat(g.table[3][0], is(2));
 		assertThat(g.table[3][1], is(4));
-		g.printTable();
+		grid.display();
 	}
 	
 	@Test
@@ -221,7 +222,7 @@ public class Game2048Test {
 		g.table[3][2] = 2;
 		g.table[3][1] = 4;
 		g.table[3][0] = 2;
-		g.printTable();
+		grid.display();
 		
 		g.left();
 		
@@ -229,7 +230,7 @@ public class Game2048Test {
 		assertThat(g.table[3][1], is(4));
 		assertThat(g.table[3][2], is(2));
 		assertThat(g.table[3][3], is(4));
-		g.printTable();
+		grid.display();
 	}
 	
 	@Test
@@ -239,7 +240,7 @@ public class Game2048Test {
 		g.table[2][3] = 2;
 		g.table[2][2] = 2;
 		
-		g.printTable();
+		grid.display();
 		
 		g.left();
 		
@@ -252,19 +253,19 @@ public class Game2048Test {
 		assertThat(g.table[2][1], is(0));
 		assertThat(g.table[2][2], is(0));
 		assertThat(g.table[2][3], is(0));
-		g.printTable();
+		grid.display();
 	}
 	
 	@Test
 	public void moveOneValueRight() throws Exception {
 		int randomValue = 2;
 		g.table[0][0] = randomValue;
-		g.printTable();
+		grid.display();
 		
 		g.right();
 		
 		assertThat(g.table[0][3], is(randomValue));
-		g.printTable();
+		grid.display();
 	}
 	
 	@Test
@@ -272,13 +273,13 @@ public class Game2048Test {
 		int randomValue = 2;
 		g.table[0][0] = randomValue;
 		g.table[0][2] = randomValue;
-		g.printTable();
+		grid.display();
 		
 		g.right();
 		
 		assertThat(g.table[0][2], is(0));
 		assertThat(g.table[0][3], is(2 * randomValue));
-		g.printTable();
+		grid.display();
 	}
 	
 	
@@ -286,12 +287,12 @@ public class Game2048Test {
 	public void moveOneValueUp() throws Exception {
 		int randomValue = 2;
 		g.table[3][0] = randomValue;
-		g.printTable();
+		grid.display();
 		
 		g.up();
 		
 		assertThat(g.table[0][0], is(randomValue));
-		g.printTable();
+		grid.display();
 	}
 	
 	
@@ -300,12 +301,12 @@ public class Game2048Test {
 		int randomValue = 2;
 		g.table[1][0] = randomValue;
 		g.table[3][0] = randomValue;
-		g.printTable();
+		grid.display();
 		
 		g.up();
 		
 		assertThat(g.table[0][0], is(2 * randomValue));
-		g.printTable();
+		grid.display();
 	}
 	
 	@Test
@@ -313,14 +314,14 @@ public class Game2048Test {
 		g.table[1][0] = 2;
 		g.table[2][0] = 4;
 		g.table[3][0] = 8;
-		g.printTable();
+		grid.display();
 		
 		g.up();
 		
 		assertThat(g.table[0][0], is(2));
 		assertThat(g.table[1][0], is(4));
 		assertThat(g.table[2][0], is(8));
-		g.printTable();
+		grid.display();
 	}
 	
 	
@@ -345,7 +346,7 @@ public class Game2048Test {
 		g.table[1][3] = 2;
 		g.table[2][3] = 2;
 		g.table[3][3] = 2;
-		g.printTable();
+		grid.display();
 		
 		g.up();
 		
@@ -353,7 +354,7 @@ public class Game2048Test {
 		assertThat(g.table[0][1], is(8));
 		assertThat(g.table[0][2], is(8));
 		assertThat(g.table[0][3], is(8));
-		g.printTable();
+		grid.display();
 	}
 	
 	@Test
@@ -377,7 +378,7 @@ public class Game2048Test {
 		g.table[1][3] = 2;
 		g.table[2][3] = 2;
 		g.table[3][3] = 2;
-		g.printTable();
+		grid.display();
 		
 		g.down();
 		
@@ -385,7 +386,7 @@ public class Game2048Test {
 		assertThat(g.table[3][1], is(8));
 		assertThat(g.table[3][2], is(8));
 		assertThat(g.table[3][3], is(8));
-		g.printTable();
+		grid.display();
 	}
 	
 	
@@ -411,6 +412,8 @@ public class Game2048Test {
 				return new Cell(2, 1, 0);
 			}
 		};
+		
+		g.setGrid(grid);
 		
 		g.table[0][1] = 2;
 		g.next();
@@ -477,9 +480,11 @@ public class Game2048Test {
 			}
 		};
 		
+		g.setGrid(grid);
+		
 		try {
 			g.start();
-		} catch (Exception e) {}
+		} catch (GameInterruptedException e) {}
 	}
 
 	private void assertThatTablePrintedCorrectly() {
