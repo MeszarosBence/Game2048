@@ -2,7 +2,7 @@ package bence.game2048;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.fusesource.jansi.AnsiConsole;
 
@@ -97,63 +97,101 @@ public class Game2048 {
 		return Integer.toString(i);
 	}
 
-	public Cell getNextCell() {
-		Random rand = new Random();
-		return new Cell(2, rand.nextInt(TABLE_SIZE), rand.nextInt(TABLE_SIZE));
+	private Cell getNextCell() {
+		Cell randomCell = getRandomCell();
+		
+		if (table[randomCell.getY()][randomCell.getX()] == 0)
+			return randomCell;
+		else {
+			int row = randomCell.getY();
+			int column = randomCell.getX();
+			int maxTries = TABLE_SIZE * TABLE_SIZE + 1;
+			for (int tries = 0; tries < maxTries; tries++) {
+				while (row < TABLE_SIZE && tries < maxTries) {
+					while (column < TABLE_SIZE && tries < maxTries) {
+						if (table[row][column] == 0)
+							return new Cell(2, column, row);
+						column++;
+					}
+					row++;
+				}
+				row = 0;
+				column = 0;
+			}
+		};
+		
+		return null;
 	}
+
+	Cell getRandomCell() {
+		Cell randomCell = new Cell(2, ThreadLocalRandom.current().nextInt(TABLE_SIZE), ThreadLocalRandom.current().nextInt(TABLE_SIZE));
+		return randomCell;
+	}
+
 
 	public void next() {
 		Cell cell = getNextCell();
-		table[cell.getX()][cell.getY()] = cell.getValue();
+		table[cell.getY()][cell.getX()] = cell.getValue();
 		printTable();
 	}
 	
 	public void left() {
 		moveLeft();
 	}
-
-	private void moveLeft() {
+	
+	private void moveForward(DIR dir) {
 
 		for (int i = 0; i < table.length; i++)
 		for (int k = 0; k < table.length -  1; k++)
 		for (int j = 0; j < table.length - 1; j++) {
-			if (isEmptyCell(j, i) || equalsNext(j, i, DIR.RIGHT)) {
-				addNext(j, i, DIR.RIGHT);
-			}
+			if (dir == DIR.RIGHT)
+				moveHorizontal(i, j, dir);
+			if (dir == DIR.DOWN)
+				moveVertical(i, j, dir);
 		}
 	}
 	
-	private void moveUp() {
+	
+	private void moveVertical(int i, int j, DIR direction) {
+		if (isEmptyCell(i, j) || equalsNext(i, j, direction)) {
+			addNext(i, j, direction);
+		}
+	}
 
+	private void moveLeft() {
+		moveForward(DIR.RIGHT);
+	}
+	
+	private void moveUp() {
+		moveForward(DIR.DOWN);
+	}
+	
+	private void moveBackward(DIR dir) {
 		for (int i = 0; i < table.length; i++)
 		for (int k = 0; k < table.length -  1; k++)
-		for (int j = 0; j < table.length - 1; j++) {
-			if (isEmptyCell(i, j) || equalsNext(i, j, DIR.DOWN)) {
-				addNext(i, j, DIR.DOWN);
-			}
+		for (int j = table.length - 1; j > 0; j--) {
+			if (dir == DIR.LEFT)
+				moveHorizontal(i, j, dir);
+			
+			if (dir == DIR.UP)
+				moveVertical(i, j, dir);
+		}
+	}
+	
+	private void moveHorizontal(int i, int j, DIR direction) {
+		if (isEmptyCell(j, i) || equalsNext(j, i, direction)) {
+			addNext(j, i, direction);
 		}
 	}
 	
 	private void moveRight() {
 
-		for (int i = 0; i < table.length; i++)
-		for (int k = 0; k < table.length -  1; k++)
-		for (int j = table.length - 1; j > 0; j--) {
-			if (isEmptyCell(j, i) || equalsNext(j, i, DIR.LEFT)) {
-				addNext(j, i, DIR.LEFT);
-			}
-		}
+		moveBackward(DIR.LEFT);
 	}
 	
 	private void moveDown() {
 
-		for (int i = 0; i < table.length; i++)
-		for (int k = 0; k < table.length -  1; k++)
-		for (int j = table.length - 1; j > 0; j--) {
-			if (isEmptyCell(i, j) || equalsNext(i, j, DIR.UP)) {
-				addNext(i, j, DIR.UP);
-			}
-		}
+		moveBackward(DIR.UP);
 	}
 
 	private void addNext(int i, int j, DIR direction) {
@@ -217,7 +255,7 @@ public class Game2048 {
 		}
 	}
 
-	public int readFromConsole() throws GameInterruptedException {
+	int readFromConsole() throws GameInterruptedException {
 		int input = 0;
 		try {
 			input = RawConsoleInput.read(true);
@@ -244,7 +282,4 @@ public class Game2048 {
 					break;
 			}
 	}
-
 }
-
-	

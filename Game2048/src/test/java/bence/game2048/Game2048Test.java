@@ -22,6 +22,8 @@ import biz.source_code.utils.RawConsoleInput;
 
 public class Game2048Test {
 	
+	private static final int[] NO_KEY_PRESSED = new int[] {};
+
 	private static final int FOURTH_ROW = 3;
 
 	private static final int THIRD_ROW = 2;
@@ -52,6 +54,10 @@ public class Game2048Test {
 	private static final int KEY_RIGHT = 57421;
 	private static final int KEY_UP = 57416;
 	private static final int KEY_DOWN = 57424;
+
+	private static final int[] COUNTER_CLOCK = new int[] {KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP};
+
+	private static final Cell[] ONE_CELL = {new Cell(2,3,0)};
 	
 	
 	int[][] table = new int[4][4];
@@ -136,8 +142,15 @@ public class Game2048Test {
 	
 	@Test
 	public void placeFirstCellRandomly() throws Exception {
-		startGameWithKeyStrokes(new int[] {});
+		startGameWithKeyStrokes(NO_KEY_PRESSED, ONE_CELL);
 
+		assertThat(countCells(), is(1));
+		
+		g.printTable();
+		
+	}
+
+	private int countCells() {
 		int found = 0;
 		for (int i = 0; i < table.length; i++) {
 			for (int j = 0; j < table.length; j++) {
@@ -145,15 +158,12 @@ public class Game2048Test {
 			}
 			
 		}
-		assertThat(found, is(1));
-		
-		g.printTable();
-		
+		return found;
 	}
 	
 	@Test
 	@Ignore
-	public void readArrowsInNonBlockingMode() throws Exception {
+	public void readArrowsFromKeyboard() throws Exception {
 		
 		System.out.println("trying to read a character:");
 		int read = RawConsoleInput.read(true);
@@ -381,19 +391,75 @@ public class Game2048Test {
 	
 	@Test
 	public void buttonLeft() throws Exception {
-		startGameWithKeyStrokes(new int[]{KEY_LEFT});
+		startGameWithKeyStrokes(new int[]{KEY_LEFT}, ONE_CELL);
 		assertThat(g.table[0][0], is(2));
 	}
 	
 	@Test
 	public void readMultipleKeyStrokes() throws Exception {
-		startGameWithKeyStrokes(new int[] {KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP});
+		startGameWithKeyStrokes(COUNTER_CLOCK, ONE_CELL);
 		
 		assertThat(g.table[0][0], is(0));
 		assertThat(g.table[0][3], is(2));
 	}
+	
+	@Test
+	public void findNextEmptyCellInRow() throws Exception {
+		g = new Game2048() {
+			@Override
+			Cell getRandomCell() {
+				return new Cell(2, 1, 0);
+			}
+		};
+		
+		g.table[0][1] = 2;
+		g.next();
+		
+		assertThat(g.table[0][2], is(2));
+		
+	}
+	
+	@Test
+	public void dontOverwriteExistingCells() throws Exception {
+		g.table[0][1] = 2;
+		g.table[0][2] = 2;
+		g.table[0][3] = 2;
+		
+		g.table[1][0] = 2;
+		g.table[1][1] = 2;
+		g.table[1][2] = 2;
+		g.table[1][3] = 2;
 
-	private void startGameWithKeyStrokes(final int[] keyStrokes) {
+		g.table[2][0] = 2;
+		g.table[2][1] = 2;
+		g.table[2][2] = 2;
+		g.table[2][3] = 2;
+		
+		g.table[3][0] = 2;
+		g.table[3][1] = 2;
+		g.table[3][2] = 2;
+		g.table[3][3] = 2;
+		
+		g.next();
+		
+		assertTrue(g.table[0][0] > 0);
+	}
+	
+	@Test
+	@Ignore
+	public void dontPutNextCellIfNoMove() throws Exception {
+		
+		startGameWithKeyStrokes(
+				new int[] {KEY_LEFT, KEY_LEFT }, 
+				new Cell[] { new Cell(2, 0, 0), new Cell(2, 0, 1) });
+		
+		assertThat(countCells(), is(1));
+		
+	}
+	
+	
+
+	private void startGameWithKeyStrokes(final int[] keyStrokes, final Cell[] cells) {
 		g = new Game2048() {
 			int key = 0;
 			
@@ -406,9 +472,8 @@ public class Game2048Test {
 			
 			@Override
 			public void next() {
-				if (key == 0) {
-					table[0][3] = 2;
-				}
+				if (key < cells.length)
+					table[cells[key].getY()][cells[key].getX()] = 2;
 			}
 		};
 		
