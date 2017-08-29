@@ -1,9 +1,11 @@
 package bence.game2048;
 
-
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.PrintStream;
 
@@ -22,14 +24,11 @@ import biz.source_code.utils.RawConsoleInput;
 
 public class Game2048Test {
 	
-	private static final int[] NO_KEY_PRESSED = new int[] {};
+	private static final GameInterruptedException GAME_OVER = new GameInterruptedException("Game Over");
 
 	private static final int FOURTH_ROW = 3;
-
 	private static final int THIRD_ROW = 2;
-
 	private static final int SECOND_ROW = 1;
-
 	private static final int FIRST_ROW = 0;
 
 	@Rule
@@ -46,7 +45,6 @@ public class Game2048Test {
 	private static final String CELL_MIDDLE = "\u256C";
 	private static final String CELL_LEFT = "\u2560";
 	private static final String CELL_RIGHT = "\u2563";
-	private static final String SPACE = " ";
 	private static final String ANSI_CLS = "\u001b[2J";
 	private static final String ANSI_HOME = "\u001b[H";
 	
@@ -55,11 +53,6 @@ public class Game2048Test {
 	private static final int KEY_UP = 57416;
 	private static final int KEY_DOWN = 57424;
 
-	private static final int[] COUNTER_CLOCK = new int[] {KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP};
-
-	private static final Cell[] ONE_CELL = {new Cell(2,3,0)};
-	
-	
 	int[][] table = new int[4][4];
 	
 	@Spy
@@ -68,6 +61,8 @@ public class Game2048Test {
 
 	Game2048 g = new Game2048();
 	ConsoleGrid grid = new ConsoleGrid(table);
+	Grid gridMock = mock(Grid.class);
+	
 	@Before
 	public void setup() {
 		grid.setOutput(out);
@@ -80,7 +75,6 @@ public class Game2048Test {
 		
 		grid.display();
 		assertThatTablePrintedCorrectly();
-		
 	}
 	
 	@Test
@@ -91,7 +85,6 @@ public class Game2048Test {
 		grid.display();
 		
 		assertThatTablePrintedCorrectly();
-		
 	}
 	
 	@Test
@@ -138,16 +131,16 @@ public class Game2048Test {
 		grid.display();
 		
 		assertThatTablePrintedCorrectly();
-		
 	}
 	
 	@Test
 	public void placeFirstCellRandomly() throws Exception {
-		startGameWithKeyStrokes(NO_KEY_PRESSED, ONE_CELL);
+		g.table[0][3] = 2;
+		g.setGrid(gridMock);
+		
+		when(gridMock.readFromKeyboard()).thenThrow(GAME_OVER);
 
 		assertThat(countCells(), is(1));
-		
-		grid.display();
 		
 	}
 
@@ -157,7 +150,6 @@ public class Game2048Test {
 			for (int j = 0; j < table.length; j++) {
 				if (g.table[i][j] > 0) found++;
 			}
-			
 		}
 		return found;
 	}
@@ -172,7 +164,6 @@ public class Game2048Test {
 		if (read == KEY_DOWN) System.out.println("DOWN was pressed");
 		if (read == KEY_LEFT) System.out.println("LEFT was pressed");
 		if (read == KEY_RIGHT) System.out.println("RIGHT was pressed");
-		
 	}
 	
 	@Test
@@ -282,7 +273,6 @@ public class Game2048Test {
 		grid.display();
 	}
 	
-	
 	@Test
 	public void moveOneValueUp() throws Exception {
 		int randomValue = 2;
@@ -294,7 +284,6 @@ public class Game2048Test {
 		assertThat(g.table[0][0], is(randomValue));
 		grid.display();
 	}
-	
 	
 	@Test
 	public void moveTwoValuesUp() throws Exception {
@@ -389,16 +378,45 @@ public class Game2048Test {
 		grid.display();
 	}
 	
-	
 	@Test
 	public void buttonLeft() throws Exception {
-		startGameWithKeyStrokes(new int[]{KEY_LEFT}, ONE_CELL);
+		g = new Game2048() {
+			@Override
+			public void next() {
+			}
+		};
+		
+		g.table[0][3] = 2;
+		g.setGrid(gridMock);
+		
+		when(gridMock.readFromKeyboard()).thenReturn(KEY_LEFT).thenThrow(GAME_OVER);
+		
+		try {
+			g.start();
+		} catch (GameInterruptedException e) {
+			System.out.println(e);
+		}
+		
 		assertThat(g.table[0][0], is(2));
 	}
 	
 	@Test
 	public void readMultipleKeyStrokes() throws Exception {
-		startGameWithKeyStrokes(COUNTER_CLOCK, ONE_CELL);
+		g = new Game2048() {
+			@Override
+			public void next() {
+			}
+		};
+		
+		g.setGrid(gridMock);
+		g.table[0][3] = 2;
+		
+		when(gridMock.readFromKeyboard()).thenReturn(KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP);
+		when(gridMock.readFromKeyboard()).thenThrow(GAME_OVER);
+		
+		try {
+			g.start();
+		} catch (GameInterruptedException e) {}
 		
 		assertThat(g.table[0][0], is(0));
 		assertThat(g.table[0][3], is(2));
@@ -419,7 +437,6 @@ public class Game2048Test {
 		g.next();
 		
 		assertThat(g.table[0][2], is(2));
-		
 	}
 	
 	@Test
@@ -451,42 +468,17 @@ public class Game2048Test {
 	@Test
 	@Ignore
 	public void dontPutNextCellIfNoMove() throws Exception {
+		g.setGrid(gridMock);
 		
-		startGameWithKeyStrokes(
-				new int[] {KEY_LEFT, KEY_LEFT }, 
-				new Cell[] { new Cell(2, 0, 0), new Cell(2, 0, 1) });
-		
-		assertThat(countCells(), is(1));
-		
-	}
-	
-	
-
-	private void startGameWithKeyStrokes(final int[] keyStrokes, final Cell[] cells) {
-		g = new Game2048() {
-			int key = 0;
-			
-			@Override
-			public int readFromConsole() {
-				if (key < keyStrokes.length)
-					return keyStrokes[key++];
-				else throw new GameInterruptedException("Game over");
-			}
-			
-			@Override
-			public void next() {
-				if (key < cells.length)
-					table[cells[key].getY()][cells[key].getX()] = 2;
-			}
-		};
-		
-		g.setGrid(grid);
+		when(gridMock.readFromKeyboard()).thenReturn(KEY_RIGHT, KEY_RIGHT).thenThrow(GAME_OVER);
 		
 		try {
 			g.start();
-		} catch (GameInterruptedException e) {}
+		} catch (Exception e) {}
+		
+		assertThat(countCells(), is(1));
 	}
-
+	
 	private void assertThatTablePrintedCorrectly() {
 		inOrder.verify(out).print(ANSI_CLS + ANSI_HOME);
 		inOrder.verify(out).print(topBorderRow());
@@ -501,15 +493,20 @@ public class Game2048Test {
 	}
 
 	private String topBorderRow() {
-		return UPPER_LEFT + print(3, print(4, HORIZONTAL) + BORDER_TOP) + print(4, HORIZONTAL) + UPPER_RIGHT + System.lineSeparator();
+		return UPPER_LEFT + print(3, print(4, HORIZONTAL) + BORDER_TOP) + print(4, HORIZONTAL) + UPPER_RIGHT + 			System.lineSeparator();
 	}
 	
 	private String bottomBorderRow() {
-		return LOWER_LEFT + print(3, print(4, HORIZONTAL) + BORDER_BOTTOM) + print(4, HORIZONTAL) + LOWER_RIGHT + System.lineSeparator();
+		return LOWER_LEFT + print(3, print(4, HORIZONTAL) + BORDER_BOTTOM) + print(4, HORIZONTAL) + LOWER_RIGHT + 			System.lineSeparator();
 	}
 
 	private String middleBorderRow() {
-		return CELL_LEFT + print(3, print(4, HORIZONTAL) + CELL_MIDDLE) + print(4, HORIZONTAL) + CELL_RIGHT + System.lineSeparator();
+		return CELL_LEFT + 
+				print(3, print(4, HORIZONTAL) + 
+				CELL_MIDDLE) + 
+				print(4, HORIZONTAL) + 
+				CELL_RIGHT + 
+				System.lineSeparator();
 	}
 
 	private String contentRow(int[] content) {
@@ -522,7 +519,6 @@ public class Game2048Test {
 		
 		return row.toString();
 	}
-	
 
 	private String printCell(int i) {
 		if (i < 2) return "    ";

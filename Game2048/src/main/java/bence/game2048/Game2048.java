@@ -1,9 +1,6 @@
 package bence.game2048;
 
-import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
-
-import biz.source_code.utils.RawConsoleInput;
 
 public class Game2048 {
 
@@ -61,7 +58,6 @@ public class Game2048 {
 	public void next() {
 		Cell cell = getNextCell();
 		table[cell.getY()][cell.getX()] = cell.getValue();
-		grid.display();
 	}
 
 	public void left() {
@@ -181,19 +177,9 @@ public class Game2048 {
 		}
 	}
 
-	int readFromConsole() throws GameInterruptedException {
-		int input = 0;
-		try {
-			input = RawConsoleInput.read(true);
-		} catch (IOException e) {
-			throw new GameInterruptedException(e);
-		}
-		return input;
-	}
-
 	public void processUserInput() throws GameInterruptedException {
 
-		switch (readFromConsole()) {
+		switch (grid.readFromKeyboard()) {
 		case KEY_LEFT:
 			left();
 			break;
