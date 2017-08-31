@@ -6,7 +6,7 @@ import bence.game2048.Game2048.DIR;
 
 public class Table {
 	
-	private static final int TABLE_SIZE = 4;
+	public static final int TABLE_SIZE = 4;
 	int[][] table = new int[TABLE_SIZE][TABLE_SIZE];
 	private int moves = 0;
 	

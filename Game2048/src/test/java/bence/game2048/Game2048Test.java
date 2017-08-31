@@ -1,10 +1,10 @@
 package bence.game2048;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintStream;
@@ -55,32 +55,32 @@ public class Game2048Test {
 	private static final int KEY_UP = 57416;
 	private static final int KEY_DOWN = 57424;
 
-	Table t = new Table();
-	int[][] table = new int[t.getSize()][t.getSize()]; 
+	Table tableControl = new Table();
+	int[][] table = new int[Table.TABLE_SIZE][Table.TABLE_SIZE]; 
 	
 	@Spy
 	private PrintStream out = new PrintStream(AnsiConsole.out);
 	InOrder inOrder = null;
 
 	Game2048 game = new Game2048();
-	ConsoleGrid grid = new ConsoleGrid(t);
-	Presentation gridMock = mock(Presentation.class);
-	Input input = mock(Input.class);
+	ConsoleGrid consoleGrid = new ConsoleGrid(tableControl);
+	Presentation presentationMock = mock(Presentation.class);
+	Input inputMock = mock(Input.class);
 	
 	@Before
 	public void setup() {
-		grid.setOutput(out);
-		game.setPresentation(grid);
-		game.setTable(t);
-		game.setInput(input);
+		consoleGrid.setOutput(out);
+		game.setPresentation(consoleGrid);
+		game.setTable(tableControl);
+		game.setInput(inputMock);
 		inOrder = inOrder(out);
-		t.setTable(table);
+		tableControl.setTable(table);
 	}
 	
 	@Test
 	public void printTableWithoutContent() throws Exception {
 		
-		grid.display();
+		consoleGrid.display();
 		assertThatTablePrintedCorrectly();
 	}
 	
@@ -88,7 +88,7 @@ public class Game2048Test {
 	public void printContentOneElement() throws Exception {
 		table[0][0] = 2;
 
-		grid.display();
+		consoleGrid.display();
 		
 		assertThatTablePrintedCorrectly();
 	}
@@ -98,7 +98,7 @@ public class Game2048Test {
 		out.print(ANSI_CLS);
 		table[0][0] = 2;
 
-		grid.display();
+		consoleGrid.display();
 		
 //		Thread.sleep(500);  //In order to verify it visually
 		
@@ -107,7 +107,7 @@ public class Game2048Test {
 		
 		table[0][0] = 0;
 		table[0][1] = 2;
-		grid.display();
+		consoleGrid.display();
 		
 //		Thread.sleep(500); //In order to verify it visually
 		assertThatTablePrintedCorrectly();
@@ -132,32 +132,22 @@ public class Game2048Test {
 		table[3][2] = 128;
 		table[3][3] = 64;
 		
-		grid.display();
+		consoleGrid.display();
 		
 		assertThatTablePrintedCorrectly();
 	}
 	
 	@Test
 	public void placeFirstCellRandomly() throws Exception {
-		table[0][3] = 2;
-		game.setPresentation(gridMock);
 		
-		when(input.readFromKeyboard()).thenThrow(GAME_OVER);
+		when(inputMock.readFromKeyboard()).thenThrow(GAME_OVER);
+		
+		game.start();
 
 		assertThat(countCells(), is(1));
 		
 	}
 
-	private int countCells() {
-		int found = 0;
-		for (int i = 0; i < t.table.length; i++) {
-			for (int j = 0; j < t.table.length; j++) {
-				if (t.table[i][j] > 0) found++;
-			}
-		}
-		return found;
-	}
-	
 	@Test
 	@Ignore
 	public void readArrowsFromKeyboard() throws Exception {
@@ -174,316 +164,308 @@ public class Game2048Test {
 	@Test
 	public void moveOneValueLeft() throws Exception {
 		int randomValue = 2;
-		t.table[0][3] = randomValue;
-		grid.display();
+		tableControl.table[0][3] = randomValue;
+		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(t.table[0][0], is(randomValue));
-		grid.display();
+		assertThat(tableControl.table[0][0], is(randomValue));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveValuesLeftAndAddThemIfTheyAreEqual() throws Exception {
 		int randomValue = 2;
-		t.table[0][3] = randomValue;
-		t.table[0][2] = randomValue;
-		grid.display();
+		tableControl.table[0][3] = randomValue;
+		tableControl.table[0][2] = randomValue;
+		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(t.table[0][0], is(2 * randomValue));
-		assertThat(t.table[0][1], is(0));
-		assertThat(t.table[0][2], is(0));
-		assertThat(t.table[0][3], is(0));
-		grid.display();
+		assertThat(tableControl.table[0][0], is(2 * randomValue));
+		assertThat(tableControl.table[0][1], is(0));
+		assertThat(tableControl.table[0][2], is(0));
+		assertThat(tableControl.table[0][3], is(0));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveValuesLeftAndDontAddThemIfTheyAreNotEqual() throws Exception {
-		t.table[3][3] = 4;
-		t.table[3][2] = 2;
-		grid.display();
+		tableControl.table[3][3] = 4;
+		tableControl.table[3][2] = 2;
+		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(t.table[3][0], is(2));
-		assertThat(t.table[3][1], is(4));
-		grid.display();
+		assertThat(tableControl.table[3][0], is(2));
+		assertThat(tableControl.table[3][1], is(4));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void dontMoveValuesLeft() throws Exception {
-		t.table[3][3] = 4;
-		t.table[3][2] = 2;
-		t.table[3][1] = 4;
-		t.table[3][0] = 2;
-		grid.display();
+		tableControl.table[3][3] = 4;
+		tableControl.table[3][2] = 2;
+		tableControl.table[3][1] = 4;
+		tableControl.table[3][0] = 2;
+		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(t.table[3][0], is(2));
-		assertThat(t.table[3][1], is(4));
-		assertThat(t.table[3][2], is(2));
-		assertThat(t.table[3][3], is(4));
-		grid.display();
+		assertThat(tableControl.table[3][0], is(2));
+		assertThat(tableControl.table[3][1], is(4));
+		assertThat(tableControl.table[3][2], is(2));
+		assertThat(tableControl.table[3][3], is(4));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveMultipleRowsLeftAndAddValues() throws Exception {
-		t.table[3][3] = 2;
-		t.table[3][2] = 2;
-		t.table[2][3] = 2;
-		t.table[2][2] = 2;
+		tableControl.table[3][3] = 2;
+		tableControl.table[3][2] = 2;
+		tableControl.table[2][3] = 2;
+		tableControl.table[2][2] = 2;
 		
-		grid.display();
+		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(t.table[3][0], is(4));
-		assertThat(t.table[3][1], is(0));
-		assertThat(t.table[3][2], is(0));
-		assertThat(t.table[3][3], is(0));
+		assertThat(tableControl.table[3][0], is(4));
+		assertThat(tableControl.table[3][1], is(0));
+		assertThat(tableControl.table[3][2], is(0));
+		assertThat(tableControl.table[3][3], is(0));
 		
-		assertThat(t.table[2][0], is(4));
-		assertThat(t.table[2][1], is(0));
-		assertThat(t.table[2][2], is(0));
-		assertThat(t.table[2][3], is(0));
-		grid.display();
+		assertThat(tableControl.table[2][0], is(4));
+		assertThat(tableControl.table[2][1], is(0));
+		assertThat(tableControl.table[2][2], is(0));
+		assertThat(tableControl.table[2][3], is(0));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveOneValueRight() throws Exception {
 		int randomValue = 2;
-		t.table[0][0] = randomValue;
-		grid.display();
+		tableControl.table[0][0] = randomValue;
+		consoleGrid.display();
 		
 		game.right();
 		
-		assertThat(t.table[0][3], is(randomValue));
-		grid.display();
+		assertThat(tableControl.table[0][3], is(randomValue));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void addAndMoveTwoValuesRight() throws Exception {
 		int randomValue = 2;
-		t.table[0][0] = randomValue;
-		t.table[0][2] = randomValue;
-		grid.display();
+		tableControl.table[0][0] = randomValue;
+		tableControl.table[0][2] = randomValue;
+		consoleGrid.display();
 		
 		game.right();
 		
-		assertThat(t.table[0][2], is(0));
-		assertThat(t.table[0][3], is(2 * randomValue));
-		grid.display();
+		assertThat(tableControl.table[0][2], is(0));
+		assertThat(tableControl.table[0][3], is(2 * randomValue));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveOneValueUp() throws Exception {
 		int randomValue = 2;
-		t.table[3][0] = randomValue;
-		grid.display();
+		tableControl.table[3][0] = randomValue;
+		consoleGrid.display();
 		
 		game.up();
 		
-		assertThat(t.table[0][0], is(randomValue));
-		grid.display();
+		assertThat(tableControl.table[0][0], is(randomValue));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveTwoValuesUp() throws Exception {
 		int randomValue = 2;
-		t.table[1][0] = randomValue;
-		t.table[3][0] = randomValue;
-		grid.display();
+		tableControl.table[1][0] = randomValue;
+		tableControl.table[3][0] = randomValue;
+		consoleGrid.display();
 		
 		game.up();
 		
-		assertThat(t.table[0][0], is(2 * randomValue));
-		grid.display();
+		assertThat(tableControl.table[0][0], is(2 * randomValue));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveThreeValuesUp() throws Exception {
-		t.table[1][0] = 2;
-		t.table[2][0] = 4;
-		t.table[3][0] = 8;
-		grid.display();
+		tableControl.table[1][0] = 2;
+		tableControl.table[2][0] = 4;
+		tableControl.table[3][0] = 8;
+		consoleGrid.display();
 		
 		game.up();
 		
-		assertThat(t.table[0][0], is(2));
-		assertThat(t.table[1][0], is(4));
-		assertThat(t.table[2][0], is(8));
-		grid.display();
+		assertThat(tableControl.table[0][0], is(2));
+		assertThat(tableControl.table[1][0], is(4));
+		assertThat(tableControl.table[2][0], is(8));
+		consoleGrid.display();
 	}
 	
 	
 	@Test
 	public void fullTableUp() throws Exception {
-		t.table[0][0] = 2;
-		t.table[1][0] = 2;
-		t.table[2][0] = 2;
-		t.table[3][0] = 2;
+		tableControl.table[0][0] = 2;
+		tableControl.table[1][0] = 2;
+		tableControl.table[2][0] = 2;
+		tableControl.table[3][0] = 2;
 		
-		t.table[0][1] = 2;
-		t.table[1][1] = 2;
-		t.table[2][1] = 2;
-		t.table[3][1] = 2;
+		tableControl.table[0][1] = 2;
+		tableControl.table[1][1] = 2;
+		tableControl.table[2][1] = 2;
+		tableControl.table[3][1] = 2;
 		
-		t.table[0][2] = 2;
-		t.table[1][2] = 2;
-		t.table[2][2] = 2;
-		t.table[3][2] = 2; 
+		tableControl.table[0][2] = 2;
+		tableControl.table[1][2] = 2;
+		tableControl.table[2][2] = 2;
+		tableControl.table[3][2] = 2; 
 		
-		t.table[0][3] = 2;
-		t.table[1][3] = 2;
-		t.table[2][3] = 2;
-		t.table[3][3] = 2;
-		grid.display();
+		tableControl.table[0][3] = 2;
+		tableControl.table[1][3] = 2;
+		tableControl.table[2][3] = 2;
+		tableControl.table[3][3] = 2;
+		consoleGrid.display();
 		
 		game.up();
 		
-		assertThat(t.table[0][0], is(8));
-		assertThat(t.table[0][1], is(8));
-		assertThat(t.table[0][2], is(8));
-		assertThat(t.table[0][3], is(8));
-		grid.display();
+		assertThat(tableControl.table[0][0], is(8));
+		assertThat(tableControl.table[0][1], is(8));
+		assertThat(tableControl.table[0][2], is(8));
+		assertThat(tableControl.table[0][3], is(8));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void down() throws Exception {
-		t.table[0][0] = 2;
-		t.table[1][0] = 2;
-		t.table[2][0] = 2;
-		t.table[3][0] = 2;
+		tableControl.table[0][0] = 2;
+		tableControl.table[1][0] = 2;
+		tableControl.table[2][0] = 2;
+		tableControl.table[3][0] = 2;
 		
-		t.table[0][1] = 2;
-		t.table[1][1] = 2;
-		t.table[2][1] = 2;
-		t.table[3][1] = 2;
+		tableControl.table[0][1] = 2;
+		tableControl.table[1][1] = 2;
+		tableControl.table[2][1] = 2;
+		tableControl.table[3][1] = 2;
 		
-		t.table[0][2] = 2;
-		t.table[1][2] = 2;
-		t.table[2][2] = 2;
-		t.table[3][2] = 2; 
+		tableControl.table[0][2] = 2;
+		tableControl.table[1][2] = 2;
+		tableControl.table[2][2] = 2;
+		tableControl.table[3][2] = 2; 
 		
-		t.table[0][3] = 2;
-		t.table[1][3] = 2;
-		t.table[2][3] = 2;
-		t.table[3][3] = 2;
-		grid.display();
+		tableControl.table[0][3] = 2;
+		tableControl.table[1][3] = 2;
+		tableControl.table[2][3] = 2;
+		tableControl.table[3][3] = 2;
+		consoleGrid.display();
 		
 		game.down();
 		
-		assertThat(t.table[3][0], is(8));
-		assertThat(t.table[3][1], is(8));
-		assertThat(t.table[3][2], is(8));
-		assertThat(t.table[3][3], is(8));
-		grid.display();
+		assertThat(tableControl.table[3][0], is(8));
+		assertThat(tableControl.table[3][1], is(8));
+		assertThat(tableControl.table[3][2], is(8));
+		assertThat(tableControl.table[3][3], is(8));
+		consoleGrid.display();
 	}
 	
 	@Test
 	public void buttonLeft() throws Exception {
-		t = new Table() {
+		tableControl = new Table() {
 			@Override
 			public void putANewItem() {
 			}
 		};
 		
-		game.setTable(t);
+		game.setTable(tableControl);
 		
-		t.table[0][3] = 2;
-		game.setPresentation(gridMock);
+		tableControl.table[0][3] = 2;
+		game.setPresentation(presentationMock);
 		
-		when(input.readFromKeyboard()).thenReturn(KEY_LEFT).thenThrow(GAME_OVER);
+		when(inputMock.readFromKeyboard()).thenReturn(KEY_LEFT).thenThrow(GAME_OVER);
 		
-		try {
-			game.start();
-		} catch (GameInterruptedException e) {
-			System.out.println(e);
-		}
+		game.start();
 		
-		assertThat(t.table[0][0], is(2));
+		assertThat(tableControl.table[0][0], is(2));
 	}
 	
 	@Test
 	public void readMultipleKeyStrokes() throws Exception {
-		t = new Table() {
+		tableControl = new Table() {
 			@Override
 			public void putANewItem() {
 			}
 		};
 		
-		game.setPresentation(gridMock);
-		game.setTable(t);
+		game.setPresentation(presentationMock);
+		game.setTable(tableControl);
 		
-		t.table[0][3] = 2;
+		tableControl.table[0][3] = 2;
 		
-		when(input.readFromKeyboard()).thenReturn(KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP);
-		when(input.readFromKeyboard()).thenThrow(GAME_OVER);
+		when(inputMock.readFromKeyboard()).thenReturn(KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP);
+		when(inputMock.readFromKeyboard()).thenThrow(GAME_OVER);
 		
-		try {
-			game.start();
-		} catch (GameInterruptedException e) {}
+		game.start();
 		
-		assertThat(t.table[0][0], is(0));
-		assertThat(t.table[0][3], is(2));
+		assertThat(tableControl.table[0][0], is(0));
+		assertThat(tableControl.table[0][3], is(2));
 	}
 	
 	@Test
 	public void findNextEmptyCellInRow() throws Exception {
 		
-		t = new Table() {
+		tableControl = new Table() {
 			@Override
 			Cell getRandomCell() {
 				return new Cell(2, 1, 0);
 			}
 		};
 		
-		t.table[0][1] = 2;
-		t.putANewItem();
+		tableControl.table[0][1] = 2;
+		tableControl.putANewItem();
 		
-		assertThat(t.table[0][2], is(2));
+		assertThat(tableControl.table[0][2], is(2));
 	}
 	
 	@Test
 	public void dontOverwriteExistingCells() throws Exception {
-		t.table[0][1] = 2;
-		t.table[0][2] = 2;
-		t.table[0][3] = 2;
+		tableControl.table[0][1] = 2;
+		tableControl.table[0][2] = 2;
+		tableControl.table[0][3] = 2;
 		
-		t.table[1][0] = 2;
-		t.table[1][1] = 2;
-		t.table[1][2] = 2;
-		t.table[1][3] = 2;
+		tableControl.table[1][0] = 2;
+		tableControl.table[1][1] = 2;
+		tableControl.table[1][2] = 2;
+		tableControl.table[1][3] = 2;
 
-		t.table[2][0] = 2;
-		t.table[2][1] = 2;
-		t.table[2][2] = 2;
-		t.table[2][3] = 2;
+		tableControl.table[2][0] = 2;
+		tableControl.table[2][1] = 2;
+		tableControl.table[2][2] = 2;
+		tableControl.table[2][3] = 2;
 		
-		t.table[3][0] = 2;
-		t.table[3][1] = 2;
-		t.table[3][2] = 2;
-		t.table[3][3] = 2;
+		tableControl.table[3][0] = 2;
+		tableControl.table[3][1] = 2;
+		tableControl.table[3][2] = 2;
+		tableControl.table[3][3] = 2;
 		
-		t.putANewItem();
+		tableControl.putANewItem();
 		
-		assertTrue(t.table[0][0] > 0);
+		assertTrue(tableControl.table[0][0] > 0);
 	}
 	
-	@Test(expected = GameInterruptedException.class)
 	public void quitWithQ() throws Exception {
-		when(input.readFromKeyboard()).thenReturn(KEY_QUIT);
-		game.setPresentation(gridMock);
+		when(inputMock.readFromKeyboard()).thenReturn(KEY_QUIT);
+		game.setPresentation(presentationMock);
 		game.start();
-		
 	}
 	
 	@Test
 	public void dontPutNextCellIfNoMove() throws Exception {
-		t = new Table() {
+		tableControl = new Table() {
 			int i = 0;
 			
 			@Override
@@ -492,16 +474,26 @@ public class Game2048Test {
 			}
 		};
 		
-		game.setPresentation(gridMock);
-		game.setTable(t);
+		game.setPresentation(presentationMock);
+		game.setTable(tableControl);
 		
-		when(input.readFromKeyboard()).thenReturn(KEY_RIGHT, KEY_QUIT);
+		when(inputMock.readFromKeyboard()).thenReturn(KEY_RIGHT, KEY_QUIT);
 		
 		try {
 			game.start();
 		} catch (Exception e) {}
 		
 		assertThat(countCells(), is(1));
+	}
+	
+	@Test
+	public void printMessageWhenQuit() throws Exception {
+		game.setPresentation(presentationMock);
+		when(inputMock.readFromKeyboard()).thenReturn(KEY_QUIT);
+		
+		game.start();
+		
+		verify(presentationMock).message("Game Interrupted");
 	}
 	
 	private void assertThatTablePrintedCorrectly() {
@@ -560,5 +552,15 @@ public class Game2048Test {
 			output.append(character);
 		}
 		return output.toString();
+	}
+	
+	private int countCells() {
+		int found = 0;
+		for (int i = 0; i < tableControl.table.length; i++) {
+			for (int j = 0; j < tableControl.table.length; j++) {
+				if (tableControl.table[i][j] > 0) found++;
+			}
+		}
+		return found;
 	}
 }

@@ -1,11 +1,8 @@
 package bence.game2048;
 
-import java.io.IOException;
 import java.io.PrintStream;
 
 import org.fusesource.jansi.AnsiConsole;
-
-import biz.source_code.utils.RawConsoleInput;
 
 public class ConsoleGrid implements Presentation {
 	
@@ -88,5 +85,9 @@ public class ConsoleGrid implements Presentation {
 		if (i < 1000) return " " + i;
 		
 		return Integer.toString(i);
+	}
+
+	public void message(String text) {
+		out.println(text);
 	}
 }

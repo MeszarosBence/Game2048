@@ -51,16 +51,25 @@ public class Game2048 {
 		table.moveDown();
 	}
 
-	public void start() throws GameInterruptedException {
+	public void start() {
 		
 		drawANewItem();
 		
-		while (true) {
-			processUserInput();
-			if (isValidMove()) {
-				drawANewItem();
+		try {
+			while (true) {
+				
+				processUserInput();
+				if (isValidMove()) {
+					drawANewItem();
+				}
 			}
+		} catch (GameInterruptedException e) {
+			message("Game Interrupted");
 		}
+	}
+
+	private void message(String text) {
+		presentation.message(text);
 	}
 
 	private boolean isValidMove() {
