@@ -24,6 +24,8 @@ import biz.source_code.utils.RawConsoleInput;
 
 public class Game2048Test {
 	
+	private static final int KEY_QUIT = 113;
+
 	private static final GameInterruptedException GAME_OVER = new GameInterruptedException("Game Over");
 
 	private static final int FOURTH_ROW = 3;
@@ -53,21 +55,26 @@ public class Game2048Test {
 	private static final int KEY_UP = 57416;
 	private static final int KEY_DOWN = 57424;
 
-	int[][] table = new int[4][4];
+	Table t = new Table();
+	int[][] table = new int[t.getSize()][t.getSize()]; 
 	
 	@Spy
 	private PrintStream out = new PrintStream(AnsiConsole.out);
 	InOrder inOrder = null;
 
-	Game2048 g = new Game2048();
-	ConsoleGrid grid = new ConsoleGrid(table);
-	Grid gridMock = mock(Grid.class);
+	Game2048 game = new Game2048();
+	ConsoleGrid grid = new ConsoleGrid(t);
+	Presentation gridMock = mock(Presentation.class);
+	Input input = mock(Input.class);
 	
 	@Before
 	public void setup() {
 		grid.setOutput(out);
-		g.setGrid(grid);
+		game.setPresentation(grid);
+		game.setTable(t);
+		game.setInput(input);
 		inOrder = inOrder(out);
+		t.setTable(table);
 	}
 	
 	@Test
@@ -80,7 +87,6 @@ public class Game2048Test {
 	@Test
 	public void printContentOneElement() throws Exception {
 		table[0][0] = 2;
-		g.table = table;
 
 		grid.display();
 		
@@ -91,7 +97,6 @@ public class Game2048Test {
 	public void moving() throws Exception {
 		out.print(ANSI_CLS);
 		table[0][0] = 2;
-		g.table = table;
 
 		grid.display();
 		
@@ -126,7 +131,6 @@ public class Game2048Test {
 		table[3][1] = 256;
 		table[3][2] = 128;
 		table[3][3] = 64;
-		g.table = table;
 		
 		grid.display();
 		
@@ -135,10 +139,10 @@ public class Game2048Test {
 	
 	@Test
 	public void placeFirstCellRandomly() throws Exception {
-		g.table[0][3] = 2;
-		g.setGrid(gridMock);
+		table[0][3] = 2;
+		game.setPresentation(gridMock);
 		
-		when(gridMock.readFromKeyboard()).thenThrow(GAME_OVER);
+		when(input.readFromKeyboard()).thenThrow(GAME_OVER);
 
 		assertThat(countCells(), is(1));
 		
@@ -146,9 +150,9 @@ public class Game2048Test {
 
 	private int countCells() {
 		int found = 0;
-		for (int i = 0; i < table.length; i++) {
-			for (int j = 0; j < table.length; j++) {
-				if (g.table[i][j] > 0) found++;
+		for (int i = 0; i < t.table.length; i++) {
+			for (int j = 0; j < t.table.length; j++) {
+				if (t.table[i][j] > 0) found++;
 			}
 		}
 		return found;
@@ -160,6 +164,7 @@ public class Game2048Test {
 		
 		System.out.println("trying to read a character:");
 		int read = RawConsoleInput.read(true);
+		System.out.println(read);
 		if (read == KEY_UP) System.out.println("UP was pressed");
 		if (read == KEY_DOWN) System.out.println("DOWN was pressed");
 		if (read == KEY_LEFT) System.out.println("LEFT was pressed");
@@ -169,311 +174,331 @@ public class Game2048Test {
 	@Test
 	public void moveOneValueLeft() throws Exception {
 		int randomValue = 2;
-		g.table[0][3] = randomValue;
+		t.table[0][3] = randomValue;
 		grid.display();
 		
-		g.left();
+		game.left();
 		
-		assertThat(g.table[0][0], is(randomValue));
+		assertThat(t.table[0][0], is(randomValue));
 		grid.display();
 	}
 	
 	@Test
 	public void moveValuesLeftAndAddThemIfTheyAreEqual() throws Exception {
 		int randomValue = 2;
-		g.table[0][3] = randomValue;
-		g.table[0][2] = randomValue;
+		t.table[0][3] = randomValue;
+		t.table[0][2] = randomValue;
 		grid.display();
 		
-		g.left();
+		game.left();
 		
-		assertThat(g.table[0][0], is(2 * randomValue));
-		assertThat(g.table[0][1], is(0));
-		assertThat(g.table[0][2], is(0));
-		assertThat(g.table[0][3], is(0));
+		assertThat(t.table[0][0], is(2 * randomValue));
+		assertThat(t.table[0][1], is(0));
+		assertThat(t.table[0][2], is(0));
+		assertThat(t.table[0][3], is(0));
 		grid.display();
 	}
 	
 	@Test
 	public void moveValuesLeftAndDontAddThemIfTheyAreNotEqual() throws Exception {
-		g.table[3][3] = 4;
-		g.table[3][2] = 2;
+		t.table[3][3] = 4;
+		t.table[3][2] = 2;
 		grid.display();
 		
-		g.left();
+		game.left();
 		
-		assertThat(g.table[3][0], is(2));
-		assertThat(g.table[3][1], is(4));
+		assertThat(t.table[3][0], is(2));
+		assertThat(t.table[3][1], is(4));
 		grid.display();
 	}
 	
 	@Test
 	public void dontMoveValuesLeft() throws Exception {
-		g.table[3][3] = 4;
-		g.table[3][2] = 2;
-		g.table[3][1] = 4;
-		g.table[3][0] = 2;
+		t.table[3][3] = 4;
+		t.table[3][2] = 2;
+		t.table[3][1] = 4;
+		t.table[3][0] = 2;
 		grid.display();
 		
-		g.left();
+		game.left();
 		
-		assertThat(g.table[3][0], is(2));
-		assertThat(g.table[3][1], is(4));
-		assertThat(g.table[3][2], is(2));
-		assertThat(g.table[3][3], is(4));
+		assertThat(t.table[3][0], is(2));
+		assertThat(t.table[3][1], is(4));
+		assertThat(t.table[3][2], is(2));
+		assertThat(t.table[3][3], is(4));
 		grid.display();
 	}
 	
 	@Test
 	public void moveMultipleRowsLeftAndAddValues() throws Exception {
-		g.table[3][3] = 2;
-		g.table[3][2] = 2;
-		g.table[2][3] = 2;
-		g.table[2][2] = 2;
+		t.table[3][3] = 2;
+		t.table[3][2] = 2;
+		t.table[2][3] = 2;
+		t.table[2][2] = 2;
 		
 		grid.display();
 		
-		g.left();
+		game.left();
 		
-		assertThat(g.table[3][0], is(4));
-		assertThat(g.table[3][1], is(0));
-		assertThat(g.table[3][2], is(0));
-		assertThat(g.table[3][3], is(0));
+		assertThat(t.table[3][0], is(4));
+		assertThat(t.table[3][1], is(0));
+		assertThat(t.table[3][2], is(0));
+		assertThat(t.table[3][3], is(0));
 		
-		assertThat(g.table[2][0], is(4));
-		assertThat(g.table[2][1], is(0));
-		assertThat(g.table[2][2], is(0));
-		assertThat(g.table[2][3], is(0));
+		assertThat(t.table[2][0], is(4));
+		assertThat(t.table[2][1], is(0));
+		assertThat(t.table[2][2], is(0));
+		assertThat(t.table[2][3], is(0));
 		grid.display();
 	}
 	
 	@Test
 	public void moveOneValueRight() throws Exception {
 		int randomValue = 2;
-		g.table[0][0] = randomValue;
+		t.table[0][0] = randomValue;
 		grid.display();
 		
-		g.right();
+		game.right();
 		
-		assertThat(g.table[0][3], is(randomValue));
+		assertThat(t.table[0][3], is(randomValue));
 		grid.display();
 	}
 	
 	@Test
 	public void addAndMoveTwoValuesRight() throws Exception {
 		int randomValue = 2;
-		g.table[0][0] = randomValue;
-		g.table[0][2] = randomValue;
+		t.table[0][0] = randomValue;
+		t.table[0][2] = randomValue;
 		grid.display();
 		
-		g.right();
+		game.right();
 		
-		assertThat(g.table[0][2], is(0));
-		assertThat(g.table[0][3], is(2 * randomValue));
+		assertThat(t.table[0][2], is(0));
+		assertThat(t.table[0][3], is(2 * randomValue));
 		grid.display();
 	}
 	
 	@Test
 	public void moveOneValueUp() throws Exception {
 		int randomValue = 2;
-		g.table[3][0] = randomValue;
+		t.table[3][0] = randomValue;
 		grid.display();
 		
-		g.up();
+		game.up();
 		
-		assertThat(g.table[0][0], is(randomValue));
+		assertThat(t.table[0][0], is(randomValue));
 		grid.display();
 	}
 	
 	@Test
 	public void moveTwoValuesUp() throws Exception {
 		int randomValue = 2;
-		g.table[1][0] = randomValue;
-		g.table[3][0] = randomValue;
+		t.table[1][0] = randomValue;
+		t.table[3][0] = randomValue;
 		grid.display();
 		
-		g.up();
+		game.up();
 		
-		assertThat(g.table[0][0], is(2 * randomValue));
+		assertThat(t.table[0][0], is(2 * randomValue));
 		grid.display();
 	}
 	
 	@Test
 	public void moveThreeValuesUp() throws Exception {
-		g.table[1][0] = 2;
-		g.table[2][0] = 4;
-		g.table[3][0] = 8;
+		t.table[1][0] = 2;
+		t.table[2][0] = 4;
+		t.table[3][0] = 8;
 		grid.display();
 		
-		g.up();
+		game.up();
 		
-		assertThat(g.table[0][0], is(2));
-		assertThat(g.table[1][0], is(4));
-		assertThat(g.table[2][0], is(8));
+		assertThat(t.table[0][0], is(2));
+		assertThat(t.table[1][0], is(4));
+		assertThat(t.table[2][0], is(8));
 		grid.display();
 	}
 	
 	
 	@Test
 	public void fullTableUp() throws Exception {
-		g.table[0][0] = 2;
-		g.table[1][0] = 2;
-		g.table[2][0] = 2;
-		g.table[3][0] = 2;
+		t.table[0][0] = 2;
+		t.table[1][0] = 2;
+		t.table[2][0] = 2;
+		t.table[3][0] = 2;
 		
-		g.table[0][1] = 2;
-		g.table[1][1] = 2;
-		g.table[2][1] = 2;
-		g.table[3][1] = 2;
+		t.table[0][1] = 2;
+		t.table[1][1] = 2;
+		t.table[2][1] = 2;
+		t.table[3][1] = 2;
 		
-		g.table[0][2] = 2;
-		g.table[1][2] = 2;
-		g.table[2][2] = 2;
-		g.table[3][2] = 2; 
+		t.table[0][2] = 2;
+		t.table[1][2] = 2;
+		t.table[2][2] = 2;
+		t.table[3][2] = 2; 
 		
-		g.table[0][3] = 2;
-		g.table[1][3] = 2;
-		g.table[2][3] = 2;
-		g.table[3][3] = 2;
+		t.table[0][3] = 2;
+		t.table[1][3] = 2;
+		t.table[2][3] = 2;
+		t.table[3][3] = 2;
 		grid.display();
 		
-		g.up();
+		game.up();
 		
-		assertThat(g.table[0][0], is(8));
-		assertThat(g.table[0][1], is(8));
-		assertThat(g.table[0][2], is(8));
-		assertThat(g.table[0][3], is(8));
+		assertThat(t.table[0][0], is(8));
+		assertThat(t.table[0][1], is(8));
+		assertThat(t.table[0][2], is(8));
+		assertThat(t.table[0][3], is(8));
 		grid.display();
 	}
 	
 	@Test
 	public void down() throws Exception {
-		g.table[0][0] = 2;
-		g.table[1][0] = 2;
-		g.table[2][0] = 2;
-		g.table[3][0] = 2;
+		t.table[0][0] = 2;
+		t.table[1][0] = 2;
+		t.table[2][0] = 2;
+		t.table[3][0] = 2;
 		
-		g.table[0][1] = 2;
-		g.table[1][1] = 2;
-		g.table[2][1] = 2;
-		g.table[3][1] = 2;
+		t.table[0][1] = 2;
+		t.table[1][1] = 2;
+		t.table[2][1] = 2;
+		t.table[3][1] = 2;
 		
-		g.table[0][2] = 2;
-		g.table[1][2] = 2;
-		g.table[2][2] = 2;
-		g.table[3][2] = 2; 
+		t.table[0][2] = 2;
+		t.table[1][2] = 2;
+		t.table[2][2] = 2;
+		t.table[3][2] = 2; 
 		
-		g.table[0][3] = 2;
-		g.table[1][3] = 2;
-		g.table[2][3] = 2;
-		g.table[3][3] = 2;
+		t.table[0][3] = 2;
+		t.table[1][3] = 2;
+		t.table[2][3] = 2;
+		t.table[3][3] = 2;
 		grid.display();
 		
-		g.down();
+		game.down();
 		
-		assertThat(g.table[3][0], is(8));
-		assertThat(g.table[3][1], is(8));
-		assertThat(g.table[3][2], is(8));
-		assertThat(g.table[3][3], is(8));
+		assertThat(t.table[3][0], is(8));
+		assertThat(t.table[3][1], is(8));
+		assertThat(t.table[3][2], is(8));
+		assertThat(t.table[3][3], is(8));
 		grid.display();
 	}
 	
 	@Test
 	public void buttonLeft() throws Exception {
-		g = new Game2048() {
+		t = new Table() {
 			@Override
-			public void next() {
+			public void putANewItem() {
 			}
 		};
 		
-		g.table[0][3] = 2;
-		g.setGrid(gridMock);
+		game.setTable(t);
 		
-		when(gridMock.readFromKeyboard()).thenReturn(KEY_LEFT).thenThrow(GAME_OVER);
+		t.table[0][3] = 2;
+		game.setPresentation(gridMock);
+		
+		when(input.readFromKeyboard()).thenReturn(KEY_LEFT).thenThrow(GAME_OVER);
 		
 		try {
-			g.start();
+			game.start();
 		} catch (GameInterruptedException e) {
 			System.out.println(e);
 		}
 		
-		assertThat(g.table[0][0], is(2));
+		assertThat(t.table[0][0], is(2));
 	}
 	
 	@Test
 	public void readMultipleKeyStrokes() throws Exception {
-		g = new Game2048() {
+		t = new Table() {
 			@Override
-			public void next() {
+			public void putANewItem() {
 			}
 		};
 		
-		g.setGrid(gridMock);
-		g.table[0][3] = 2;
+		game.setPresentation(gridMock);
+		game.setTable(t);
 		
-		when(gridMock.readFromKeyboard()).thenReturn(KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP);
-		when(gridMock.readFromKeyboard()).thenThrow(GAME_OVER);
+		t.table[0][3] = 2;
+		
+		when(input.readFromKeyboard()).thenReturn(KEY_LEFT, KEY_DOWN, KEY_RIGHT, KEY_UP);
+		when(input.readFromKeyboard()).thenThrow(GAME_OVER);
 		
 		try {
-			g.start();
+			game.start();
 		} catch (GameInterruptedException e) {}
 		
-		assertThat(g.table[0][0], is(0));
-		assertThat(g.table[0][3], is(2));
+		assertThat(t.table[0][0], is(0));
+		assertThat(t.table[0][3], is(2));
 	}
 	
 	@Test
 	public void findNextEmptyCellInRow() throws Exception {
-		g = new Game2048() {
+		
+		t = new Table() {
 			@Override
 			Cell getRandomCell() {
 				return new Cell(2, 1, 0);
 			}
 		};
 		
-		g.setGrid(grid);
+		t.table[0][1] = 2;
+		t.putANewItem();
 		
-		g.table[0][1] = 2;
-		g.next();
-		
-		assertThat(g.table[0][2], is(2));
+		assertThat(t.table[0][2], is(2));
 	}
 	
 	@Test
 	public void dontOverwriteExistingCells() throws Exception {
-		g.table[0][1] = 2;
-		g.table[0][2] = 2;
-		g.table[0][3] = 2;
+		t.table[0][1] = 2;
+		t.table[0][2] = 2;
+		t.table[0][3] = 2;
 		
-		g.table[1][0] = 2;
-		g.table[1][1] = 2;
-		g.table[1][2] = 2;
-		g.table[1][3] = 2;
+		t.table[1][0] = 2;
+		t.table[1][1] = 2;
+		t.table[1][2] = 2;
+		t.table[1][3] = 2;
 
-		g.table[2][0] = 2;
-		g.table[2][1] = 2;
-		g.table[2][2] = 2;
-		g.table[2][3] = 2;
+		t.table[2][0] = 2;
+		t.table[2][1] = 2;
+		t.table[2][2] = 2;
+		t.table[2][3] = 2;
 		
-		g.table[3][0] = 2;
-		g.table[3][1] = 2;
-		g.table[3][2] = 2;
-		g.table[3][3] = 2;
+		t.table[3][0] = 2;
+		t.table[3][1] = 2;
+		t.table[3][2] = 2;
+		t.table[3][3] = 2;
 		
-		g.next();
+		t.putANewItem();
 		
-		assertTrue(g.table[0][0] > 0);
+		assertTrue(t.table[0][0] > 0);
+	}
+	
+	@Test(expected = GameInterruptedException.class)
+	public void quitWithQ() throws Exception {
+		when(input.readFromKeyboard()).thenReturn(KEY_QUIT);
+		game.setPresentation(gridMock);
+		game.start();
+		
 	}
 	
 	@Test
-	@Ignore
 	public void dontPutNextCellIfNoMove() throws Exception {
-		g.setGrid(gridMock);
+		t = new Table() {
+			int i = 0;
+			
+			@Override
+			Cell getRandomCell() {
+				return new Cell(2, 3, i++);
+			}
+		};
 		
-		when(gridMock.readFromKeyboard()).thenReturn(KEY_RIGHT, KEY_RIGHT).thenThrow(GAME_OVER);
+		game.setPresentation(gridMock);
+		game.setTable(t);
+		
+		when(input.readFromKeyboard()).thenReturn(KEY_RIGHT, KEY_QUIT);
 		
 		try {
-			g.start();
+			game.start();
 		} catch (Exception e) {}
 		
 		assertThat(countCells(), is(1));
