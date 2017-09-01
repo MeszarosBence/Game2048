@@ -6,6 +6,7 @@ import org.fusesource.jansi.AnsiConsole;
 
 public class ConsoleGrid implements Presentation {
 	
+	private static final int DEFAULT_DELAY_IN_MS = 300;
 	private static final String HORIZONTAL = "\u2550";
 	private static final String VERTICAL = "\u2551";
 	private static final String UPPER_LEFT = "\u2554";
@@ -22,12 +23,31 @@ public class ConsoleGrid implements Presentation {
 	
 	PrintStream out = new PrintStream(AnsiConsole.out);
 	Table table;
+	private int delay = DEFAULT_DELAY_IN_MS;
 	
 	public ConsoleGrid(Table table) {
 		this.table = table;
 	}
 	
+	public void setDelay(int delay) {
+		this.delay = delay;
+	}
+	
 	public void display() {
+		decoratedDisplay();
+	}
+	
+	private void decoratedDisplay() {
+		displayTable();
+		if (table.hasNewCell()) {
+			sleep();
+			table.newCell.getValue().resetNew();
+			displayTable();
+		}
+		
+	}
+	
+	private void displayTable() {
 		out.print(ANSI_CLS + ANSI_HOME);
 		out.print(topBorderRow());    
 		out.print(printRow(table.getRow(0)));      
@@ -38,12 +58,11 @@ public class ConsoleGrid implements Presentation {
 		out.print(middleBorderRow()); 
 		out.print(printRow(table.getRow(3)));      
 		out.print(bottomBorderRow());
-		
 	}
 
 	private void sleep() {
 		try {
-			Thread.sleep(500);
+			Thread.sleep(delay);
 		} catch (InterruptedException e) {
 		}
 	}

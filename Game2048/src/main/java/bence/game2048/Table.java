@@ -5,11 +5,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import bence.game2048.Game2048.DIR;
 
 public class Table {
-	private static final CellValue VALUE_2 = new CellValue(2);
-	private static final CellValue VALUE_0 = new CellValue(0);
-	private static final CellValue VALUE_4 = new CellValue(4);
-	private static final CellValue VALUE_8 = new CellValue(8);
-	
 	public Table() {
   		reset();
 	}
@@ -59,9 +54,9 @@ public class Table {
 						column++;
 					}
 					row++;
+					column = 0;
 				}
 				row = 0;
-				column = 0;
 			}
 		}
 
@@ -180,5 +175,11 @@ public class Table {
 				table[i][j] = new CellValue(0);
 			}
 		}
+	}
+
+	public boolean hasNewCell() {
+		if (newCell != null && newCell.getValue().isNew())
+			return true;
+		return false;
 	}
 }

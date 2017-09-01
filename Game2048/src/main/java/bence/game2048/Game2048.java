@@ -79,8 +79,6 @@ public class Game2048 {
 	private void drawANewItem() {
 		table.putANewItem();
 		presentation.display();
-		table.newCell.getValue().resetNew();
-		presentation.display();
 	}
 
 	public void processUserInput() throws GameInterruptedException {

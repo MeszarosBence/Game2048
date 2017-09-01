@@ -1,14 +1,14 @@
 package bence.game2048;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintStream;
-import java.util.Arrays;
 
 import org.fusesource.jansi.AnsiConsole;
 import org.junit.Before;
@@ -76,6 +76,7 @@ public class Game2048Test {
 	@Before
 	public void setup() {
 		consoleGrid.setOutput(out);
+		consoleGrid.setDelay(0);
 		game.setPresentation(consoleGrid);
 		game.setTable(tableControl);
 		game.setInput(inputMock);
@@ -413,6 +414,21 @@ public class Game2048Test {
 		tableControl.putANewItem();
 		
 		assertThat(tableControl.table[0][2], is(VALUE_2));
+	}
+	
+	@Test
+	public void findNextEmptyCellInNextRow() throws Exception {
+		
+		prepareTableWith(new Cell(2, 1, 0));
+		
+		tableControl.table[0][0] = VALUE_2;
+		tableControl.table[0][1] = VALUE_2;
+		tableControl.table[0][2] = VALUE_2;
+		tableControl.table[0][3] = VALUE_2;
+		
+		tableControl.putANewItem();
+		
+		assertThat(tableControl.table[1][0], is(VALUE_2));
 	}
 	
 	@Test
