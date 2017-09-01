@@ -44,7 +44,6 @@ public class ConsoleGrid implements Presentation {
 			table.newCell.getValue().resetNew();
 			displayTable();
 		}
-		
 	}
 	
 	private void displayTable() {

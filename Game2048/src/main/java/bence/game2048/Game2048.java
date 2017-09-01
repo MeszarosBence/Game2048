@@ -52,12 +52,10 @@ public class Game2048 {
 	}
 
 	public void start() {
-		
 		drawANewItem();
 		
 		try {
-			while (true) {
-				
+			while(true) {
 				processUserInput();
 				if (isValidMove()) {
 					drawANewItem();
