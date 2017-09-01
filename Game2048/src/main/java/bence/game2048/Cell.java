@@ -1,17 +1,17 @@
 package bence.game2048;
 
 public class Cell {
-	private int value;
+	private CellValue value;
 	private int x;
 	private int y;
 	
 	public Cell(int value, int x, int y) {
-		this.value = value;
+		this.value = new CellValue(value, true);
 		this.x = x;
 		this.y = y;
 	}
 	
-	public int getValue() {
+	public CellValue getValue() {
 		return value;
 	}
 

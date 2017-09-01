@@ -5,10 +5,19 @@ import java.util.concurrent.ThreadLocalRandom;
 import bence.game2048.Game2048.DIR;
 
 public class Table {
+	private static final CellValue VALUE_2 = new CellValue(2);
+	private static final CellValue VALUE_0 = new CellValue(0);
+	private static final CellValue VALUE_4 = new CellValue(4);
+	private static final CellValue VALUE_8 = new CellValue(8);
+	
+	public Table() {
+  		reset();
+	}
 	
 	public static final int TABLE_SIZE = 4;
-	int[][] table = new int[TABLE_SIZE][TABLE_SIZE];
+	CellValue[][] table = new CellValue[TABLE_SIZE][TABLE_SIZE];
 	private int moves = 0;
+	Cell newCell;
 	
 	public void moveLeft() {
 		moveForward(DIR.RIGHT);
@@ -19,25 +28,24 @@ public class Table {
 	}
 	
 	public void moveRight() {
-
 		moveBackward(DIR.LEFT);
 	}
 
 	public void moveDown() {
-
 		moveBackward(DIR.UP);
 	}
 	
 	public void putANewItem() {
 		Cell cell = getNextCell();
 		table[cell.getY()][cell.getX()] = cell.getValue();
+		this.newCell = cell;
 		moves = 0;
 	}
 	
 	private Cell getNextCell() {
 		Cell randomCell = getRandomCell();
 
-		if (table[randomCell.getY()][randomCell.getX()] == 0)
+		if (table[randomCell.getY()][randomCell.getX()].getValue() == 0)
 			return randomCell;
 		else {
 			int row = randomCell.getY();
@@ -46,7 +54,7 @@ public class Table {
 			for (int tries = 0; tries < maxTries; tries++) {
 				while (row < TABLE_SIZE && tries < maxTries) {
 					while (column < TABLE_SIZE && tries < maxTries) {
-						if (table[row][column] == 0)
+						if (table[row][column].getValue() == 0)
 							return new Cell(2, column, row);
 						column++;
 					}
@@ -73,51 +81,51 @@ public class Table {
 	
 	void addNext(int i, int j, DIR direction) {
 		if (direction == DIR.DOWN) {
-			table[j][i] = table[j][i] + table[j + 1][i];
-			table[j + 1][i] = 0;
-			if (table[j][i] != table[j + 1][i]) moves++;
+			table[j][i] = new CellValue(table[j][i].getValue() + table[j + 1][i].getValue());
+			table[j + 1][i] = new CellValue(0);
+			if (table[j][i].getValue() != table[j + 1][i].getValue()) moves++;
 		}
 
 		if (direction == DIR.UP) {
-			table[j][i] = table[j][i] + table[j - 1][i];
-			table[j - 1][i] = 0;
-			if (table[j][i] != table[j - 1][i]) moves++;
+			table[j][i] = new CellValue(table[j][i].getValue() + table[j - 1][i].getValue());
+			table[j - 1][i] = new CellValue(0);
+			if (table[j][i].getValue() != table[j - 1][i].getValue()) moves++;
 		}
 
 		if (direction == DIR.RIGHT) {
-			table[j][i] = table[j][i] + table[j][i + 1];
-			table[j][i + 1] = 0;
-			if (table[j][i] != table[j][i + 1]) moves++;
+			table[j][i] = new CellValue(table[j][i].getValue() + table[j][i + 1].getValue());
+			table[j][i + 1] = new CellValue(0);
+			if (table[j][i].getValue() != table[j][i + 1].getValue()) moves++;
 		}
 
 		if (direction == DIR.LEFT) {
-			if (table[j][i] != table[j][i - 1]) moves++;
-			table[j][i] = table[j][i] + table[j][i - 1];
-			table[j][i - 1] = 0;
+			if (table[j][i].getValue() != table[j][i - 1].getValue()) moves++;
+			table[j][i] = new CellValue(table[j][i].getValue() + table[j][i - 1].getValue());
+			table[j][i - 1] = new CellValue(0);
 		}
 	}
 	
 	boolean equalsNext(int column, int row, DIR direction) {
 		if (direction == DIR.DOWN)
-			return table[row][column] == table[row + 1][column];
+			return table[row][column].getValue() == table[row + 1][column].getValue();
 		if (direction == DIR.UP)
-			return table[row][column] == table[row - 1][column];
+			return table[row][column].getValue() == table[row - 1][column].getValue();
 		if (direction == DIR.RIGHT)
-			return table[row][column] == table[row][column + 1];
+			return table[row][column].getValue() == table[row][column + 1].getValue();
 		if (direction == DIR.LEFT)
-			return table[row][column] == table[row][column - 1];
+			return table[row][column].getValue() == table[row][column - 1].getValue();
 		return false;
 	}
 	
 	boolean isEmptyCell(int column, int row) {
-		return table[row][column] == 0;
+		return table[row][column].getValue() == 0;
 	}
 	
 	boolean wereCellsMoved() {
 		return (moves > 0);
 	}
 
-	public int[] getRow(int row) {
+	public CellValue[] getRow(int row) {
 		return table[row];
 	}
 
@@ -125,7 +133,7 @@ public class Table {
 		table[cell.getY()][cell.getX()] = cell.getValue();
 	}
 
-	public void setTable(int[][] table) {
+	public void setTable(CellValue[][] table) {
 		this.table = table;
 	}
 	
@@ -163,6 +171,14 @@ public class Table {
 	private void moveHorizontal(int i, int j, DIR direction) {
 		if (isEmptyCell(j, i) || equalsNext(j, i, direction)) {
 			addNext(j, i, direction);
+		}
+	}
+	
+	private void reset() {
+		for (int i = 0; i < table.length; i++) {
+			for (int j = 0; j < table.length; j++) {
+				table[i][j] = new CellValue(0);
+			}
 		}
 	}
 }

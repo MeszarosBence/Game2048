@@ -37,7 +37,15 @@ public class ConsoleGrid implements Presentation {
 		out.print(printRow(table.getRow(2)));      
 		out.print(middleBorderRow()); 
 		out.print(printRow(table.getRow(3)));      
-		out.print(bottomBorderRow()); 
+		out.print(bottomBorderRow());
+		
+	}
+
+	private void sleep() {
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+		}
 	}
 
 	public void setOutput(PrintStream out) {
@@ -59,10 +67,10 @@ public class ConsoleGrid implements Presentation {
 				+ System.lineSeparator();
 	}
 	
-	private String printRow(int[] content) {
+	private String printRow(CellValue[] content) {
 		StringBuilder row = new StringBuilder(VERTICAL);
 		for (int i = 0; i < content.length; i++) {
-			row.append(printCell(content[i]));
+			row.append(formatCell(content[i]));
 			row.append(VERTICAL);
 		}
 		row.append(System.lineSeparator());
@@ -78,13 +86,13 @@ public class ConsoleGrid implements Presentation {
 		return output.toString();
 	}
 	
-	private String printCell(int i) {
-		if (i < 2) return "    ";
-		if (i < 10 ) return "  " + i + " ";
-		if (i < 100) return " " + i + " ";
-		if (i < 1000) return " " + i;
+	private String formatCell(CellValue cell) {
+		if (cell.getValue() < 2 || cell.isNew()) return "    ";
+		else if (cell.getValue() < 10 ) return "  " + cell + " ";
+		else if (cell.getValue() < 100) return " " + cell + " ";
+		else if (cell.getValue() < 1000) return " " + cell;
 		
-		return Integer.toString(i);
+		return cell.toString();
 	}
 
 	public void message(String text) {
