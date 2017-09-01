@@ -65,7 +65,10 @@ public class Table {
 	
 	
 	Cell getRandomCell() {
-		Cell randomCell = new Cell(2, ThreadLocalRandom.current().nextInt(TABLE_SIZE),
+		int[] cells = {2, 4};
+		int value = ThreadLocalRandom.current().nextInt(cells.length);
+		
+		Cell randomCell = new Cell(cells[value], ThreadLocalRandom.current().nextInt(TABLE_SIZE),
 				ThreadLocalRandom.current().nextInt(TABLE_SIZE));
 		return randomCell;
 	}

@@ -1,8 +1,7 @@
 package bence.game2048;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -516,7 +515,22 @@ public class Game2048Test {
 		assertThatTablePrintedCorrectly();
 		table[0][0].resetNew();
 		assertThatTablePrintedCorrectly();
+	}
+	
+	@Test
+	public void newCellWithTwoOrFourValues() throws Exception {
+		boolean twoReturned = false;
+		boolean fourReturned = false;
+		int i = 0;
+		while (i < 500 || !(twoReturned && fourReturned)) {
+			if (tableControl.getRandomCell().getValue().equals(VALUE_2)) {
+				twoReturned = true;
+			} else fourReturned = true;
+			i++;
+		}
 		
+		assertThat(fourReturned,is(true));
+		assertThat(twoReturned,is(true));
 	}
 	
 	private void assertThatTablePrintedCorrectly() {
