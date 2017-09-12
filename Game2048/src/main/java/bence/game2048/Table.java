@@ -5,14 +5,15 @@ import java.util.concurrent.ThreadLocalRandom;
 import bence.game2048.Game2048.DIR;
 
 public class Table {
-	public Table() {
-  		reset();
-	}
 	
 	public static final int TABLE_SIZE = 4;
 	CellValue[][] table = new CellValue[TABLE_SIZE][TABLE_SIZE];
 	private int moves = 0;
 	Cell newCell;
+	
+	public Table() {
+  		reset();
+	}
 	
 	public void moveLeft() {
 		moveForward(DIR.RIGHT);
