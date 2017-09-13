@@ -41,7 +41,7 @@ public class Table {
 	private Cell getNextCell() {
 		Cell randomCell = getRandomCell();
 
-		if (table[randomCell.getY()][randomCell.getX()].getValue() == 0)
+		if (isEmptyCell(randomCell))
 			return randomCell;
 		else {
 			int row = randomCell.getY();
@@ -62,6 +62,10 @@ public class Table {
 		}
 
 		return null;
+	}
+	
+	private boolean isEmptyCell(Cell randomCell) {
+		return table[randomCell.getY()][randomCell.getX()].getValue() == 0;
 	}
 	
 	
