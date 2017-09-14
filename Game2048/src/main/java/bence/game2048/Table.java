@@ -5,14 +5,14 @@ import java.util.concurrent.ThreadLocalRandom;
 import bence.game2048.Game2048.DIR;
 
 public class Table {
-	public Table() {
-  		reset();
-	}
-	
 	public static final int TABLE_SIZE = 4;
 	CellValue[][] table = new CellValue[TABLE_SIZE][TABLE_SIZE];
 	private int moves = 0;
 	Cell newCell;
+	
+	public Table() {
+  		reset();
+	}
 	
 	public void moveLeft() {
 		moveForward(DIR.RIGHT);
@@ -40,7 +40,7 @@ public class Table {
 	private Cell getNextCell() {
 		Cell randomCell = getRandomCell();
 
-		if (table[randomCell.getY()][randomCell.getX()].getValue() == 0)
+		if (isEmptyCell(randomCell))
 			return randomCell;
 		else {
 			int row = randomCell.getY();
@@ -61,6 +61,10 @@ public class Table {
 		}
 
 		return null;
+	}
+	
+	private boolean isEmptyCell(Cell randomCell) {
+		return table[randomCell.getY()][randomCell.getX()].getValue() == 0;
 	}
 	
 	
