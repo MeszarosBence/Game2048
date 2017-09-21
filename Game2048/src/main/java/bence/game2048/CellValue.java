@@ -4,6 +4,7 @@ public class CellValue {
 
 	private int value;
 	private boolean isNew = false;
+	public static final CellValue EMPTY_CELL = new CellValue(0);
 
 	public int getValue() {
 		return value;
@@ -57,4 +58,5 @@ public class CellValue {
 	public void resetNew() {
 		isNew = false;
 	}
+
 }

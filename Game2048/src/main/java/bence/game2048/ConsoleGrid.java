@@ -1,6 +1,7 @@
 package bence.game2048;
 
 import java.io.PrintStream;
+import java.util.List;
 
 import org.fusesource.jansi.AnsiConsole;
 
@@ -34,14 +35,14 @@ public class ConsoleGrid implements Presentation {
 	}
 	
 	public void display() {
-		decoratedDisplay();
+		delayedDisplay();
 	}
 	
-	private void decoratedDisplay() {
+	private void delayedDisplay() {
 		displayTable();
 		if (table.hasNewCell()) {
 			sleep();
-			table.newCell.getValue().resetNew();
+			table.resetNew();
 			displayTable();
 		}
 	}
@@ -85,10 +86,10 @@ public class ConsoleGrid implements Presentation {
 				+ System.lineSeparator();
 	}
 	
-	private String printRow(CellValue[] content) {
+	private String printRow(List<Cell> list) {
 		StringBuilder row = new StringBuilder(VERTICAL);
-		for (int i = 0; i < content.length; i++) {
-			row.append(formatCell(content[i]));
+		for (int i = 0; i < list.size(); i++) {
+			row.append(formatCell(list.get(i)));
 			row.append(VERTICAL);
 		}
 		row.append(System.lineSeparator());
@@ -104,11 +105,11 @@ public class ConsoleGrid implements Presentation {
 		return output.toString();
 	}
 	
-	private String formatCell(CellValue cell) {
-		if (cell.getValue() < 2 || cell.isNew()) return "    ";
-		else if (cell.getValue() < 10 ) return "  " + cell + " ";
-		else if (cell.getValue() < 100) return " " + cell + " ";
-		else if (cell.getValue() < 1000) return " " + cell;
+	private String formatCell(Cell cell) {
+		if (cell.getIntValue() < 2 || cell.getValue().isNew()) return "    ";
+		else if (cell.getIntValue() < 10 ) return "  " + cell.getValue() + " ";
+		else if (cell.getIntValue() < 100) return " " + cell.getValue() + " ";
+		else if (cell.getIntValue() < 1000) return " " + cell.getValue();
 		
 		return cell.toString();
 	}

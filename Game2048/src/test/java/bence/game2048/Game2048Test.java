@@ -238,15 +238,18 @@ public class Game2048Test {
 		
 		game.left();
 		
+		assertThat(tableControl.table[2][0], is(VALUE_4));
+		assertThat(tableControl.table[2][1], is(VALUE_0));
+		assertThat(tableControl.table[2][2], is(VALUE_0));
+		assertThat(tableControl.table[2][3], is(VALUE_0));
+
+		
 		assertThat(tableControl.table[3][0], is(VALUE_4));
 		assertThat(tableControl.table[3][1], is(VALUE_0));
 		assertThat(tableControl.table[3][2], is(VALUE_0));
 		assertThat(tableControl.table[3][3], is(VALUE_0));
 		
-		assertThat(tableControl.table[2][0], is(VALUE_4));
-		assertThat(tableControl.table[2][1], is(VALUE_0));
-		assertThat(tableControl.table[2][2], is(VALUE_0));
-		assertThat(tableControl.table[2][3], is(VALUE_0));
+
 		consoleGrid.display();
 	}
 	

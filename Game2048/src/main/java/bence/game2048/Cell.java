@@ -11,6 +11,12 @@ public class Cell {
 		this.y = y;
 	}
 	
+	public Cell(CellValue value, int x, int y) {
+		this.value = value;
+		this.x = x;
+		this.y = y;
+	}
+	
 	public CellValue getValue() {
 		return value;
 	}
@@ -23,4 +29,14 @@ public class Cell {
 		return y;
 	}
 
+	public int getIntValue() {
+		return getValue().getValue();
+	}
+
+	@Override
+	public String toString() {
+		return "[" + getX() + "," + getY() + "]:" + value.toString();
+	}
+	
+	
 }
