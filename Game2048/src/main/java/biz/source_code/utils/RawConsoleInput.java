@@ -34,6 +34,7 @@ import com.sun.jna.ptr.IntByReference;
 *
 * <p>This class is used for console mode programs.
 * It supports non-blocking reads of single key strokes without echo.
+* https://www.source-code.biz/snippets/java/RawConsoleInput/
 */
 public class RawConsoleInput {
 

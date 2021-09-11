@@ -94,7 +94,7 @@ public class Game2048Test {
 	public void printContentOneElement() throws Exception {
 		table[0][0] = VALUE_2;
 		VALUE_2.resetNew();
-		tableControl.table = table;
+		tableControl.board = table;
 
 		consoleGrid.display();
 		
@@ -105,7 +105,7 @@ public class Game2048Test {
 	public void moving() throws Exception {
 		out.print(ANSI_CLS);
 		table[0][0] = VALUE_2;
-		tableControl.table = table;
+		tableControl.board = table;
 
 		consoleGrid.display();
 		
@@ -140,7 +140,7 @@ public class Game2048Test {
 		table[3][1] = VALUE_2;
 		table[3][2] = VALUE_2;
 		table[3][3] = VALUE_2;
-		tableControl.table = table;
+		tableControl.board = table;
 		
 		consoleGrid.display();
 		
@@ -173,81 +173,81 @@ public class Game2048Test {
 	
 	@Test
 	public void moveOneValueLeft() throws Exception {
-		tableControl.table[0][3] = VALUE_2;
+		tableControl.board[0][3] = VALUE_2;
 		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(tableControl.table[0][0], is(VALUE_2));
+		assertThat(tableControl.board[0][0], is(VALUE_2));
 		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveValuesLeftAndAddThemIfTheyAreEqual() throws Exception {
-		tableControl.table[0][3] = VALUE_2;
-		tableControl.table[0][2] = VALUE_2;
+		tableControl.board[0][3] = VALUE_2;
+		tableControl.board[0][2] = VALUE_2;
 		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(tableControl.table[0][0], is(VALUE_4));
-		assertThat(tableControl.table[0][1], is(VALUE_0));
-		assertThat(tableControl.table[0][2], is(VALUE_0));
-		assertThat(tableControl.table[0][3], is(VALUE_0));
+		assertThat(tableControl.board[0][0], is(VALUE_4));
+		assertThat(tableControl.board[0][1], is(VALUE_0));
+		assertThat(tableControl.board[0][2], is(VALUE_0));
+		assertThat(tableControl.board[0][3], is(VALUE_0));
 		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveValuesLeftAndDontAddThemIfTheyAreNotEqual() throws Exception {
-		tableControl.table[3][3] = VALUE_4;
-		tableControl.table[3][2] = VALUE_2;
+		tableControl.board[3][3] = VALUE_4;
+		tableControl.board[3][2] = VALUE_2;
 		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(tableControl.table[3][0], is(VALUE_2));
-		assertThat(tableControl.table[3][1], is(VALUE_4));
+		assertThat(tableControl.board[3][0], is(VALUE_2));
+		assertThat(tableControl.board[3][1], is(VALUE_4));
 		consoleGrid.display();
 	}
 	
 	@Test
 	public void dontMoveValuesIfTheyAlreadyInPosition() throws Exception {
-		tableControl.table[3][3] = VALUE_4;
-		tableControl.table[3][2] = VALUE_2;
-		tableControl.table[3][1] = VALUE_4;
-		tableControl.table[3][0] = VALUE_2;
+		tableControl.board[3][3] = VALUE_4;
+		tableControl.board[3][2] = VALUE_2;
+		tableControl.board[3][1] = VALUE_4;
+		tableControl.board[3][0] = VALUE_2;
 		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(tableControl.table[3][0], is(VALUE_2));
-		assertThat(tableControl.table[3][1], is(VALUE_4));
-		assertThat(tableControl.table[3][2], is(VALUE_2));
-		assertThat(tableControl.table[3][3], is(VALUE_4));
+		assertThat(tableControl.board[3][0], is(VALUE_2));
+		assertThat(tableControl.board[3][1], is(VALUE_4));
+		assertThat(tableControl.board[3][2], is(VALUE_2));
+		assertThat(tableControl.board[3][3], is(VALUE_4));
 		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveMultipleRowsLeftAndAddValues() throws Exception {
-		tableControl.table[3][3] = VALUE_2;
-		tableControl.table[3][2] = VALUE_2;
-		tableControl.table[2][3] = VALUE_2;
-		tableControl.table[2][2] = VALUE_2;
+		tableControl.board[3][3] = VALUE_2;
+		tableControl.board[3][2] = VALUE_2;
+		tableControl.board[2][3] = VALUE_2;
+		tableControl.board[2][2] = VALUE_2;
 		
 		consoleGrid.display();
 		
 		game.left();
 		
-		assertThat(tableControl.table[2][0], is(VALUE_4));
-		assertThat(tableControl.table[2][1], is(VALUE_0));
-		assertThat(tableControl.table[2][2], is(VALUE_0));
-		assertThat(tableControl.table[2][3], is(VALUE_0));
+		assertThat(tableControl.board[2][0], is(VALUE_4));
+		assertThat(tableControl.board[2][1], is(VALUE_0));
+		assertThat(tableControl.board[2][2], is(VALUE_0));
+		assertThat(tableControl.board[2][3], is(VALUE_0));
 
 		
-		assertThat(tableControl.table[3][0], is(VALUE_4));
-		assertThat(tableControl.table[3][1], is(VALUE_0));
-		assertThat(tableControl.table[3][2], is(VALUE_0));
-		assertThat(tableControl.table[3][3], is(VALUE_0));
+		assertThat(tableControl.board[3][0], is(VALUE_4));
+		assertThat(tableControl.board[3][1], is(VALUE_0));
+		assertThat(tableControl.board[3][2], is(VALUE_0));
+		assertThat(tableControl.board[3][3], is(VALUE_0));
 		
 
 		consoleGrid.display();
@@ -255,128 +255,128 @@ public class Game2048Test {
 	
 	@Test
 	public void moveOneValueRight() throws Exception {
-		tableControl.table[0][0] = VALUE_2;
+		tableControl.board[0][0] = VALUE_2;
 		consoleGrid.display();
 		
 		game.right();
 		
-		assertThat(tableControl.table[0][3], is(VALUE_2));
+		assertThat(tableControl.board[0][3], is(VALUE_2));
 		consoleGrid.display();
 	}
 	
 	@Test
 	public void addAndMoveTwoValuesRight() throws Exception {
-		tableControl.table[0][0] = VALUE_2;
-		tableControl.table[0][2] = VALUE_2;
+		tableControl.board[0][0] = VALUE_2;
+		tableControl.board[0][2] = VALUE_2;
 		consoleGrid.display();
 		
 		game.right();
 		
-		assertThat(tableControl.table[0][2], is(VALUE_0));
-		assertThat(tableControl.table[0][3], is(VALUE_4));
+		assertThat(tableControl.board[0][2], is(VALUE_0));
+		assertThat(tableControl.board[0][3], is(VALUE_4));
 		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveOneValueUp() throws Exception {
-		tableControl.table[3][0] = VALUE_2;
+		tableControl.board[3][0] = VALUE_2;
 		consoleGrid.display();
 		
 		game.up();
 		
-		assertThat(tableControl.table[0][0], is(VALUE_2));
+		assertThat(tableControl.board[0][0], is(VALUE_2));
 		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveTwoValuesUp() throws Exception {
-		tableControl.table[1][0] = VALUE_2;
-		tableControl.table[3][0] = VALUE_2;
+		tableControl.board[1][0] = VALUE_2;
+		tableControl.board[3][0] = VALUE_2;
 		consoleGrid.display();
 		
 		game.up();
 		
-		assertThat(tableControl.table[0][0], is(VALUE_4));
+		assertThat(tableControl.board[0][0], is(VALUE_4));
 		consoleGrid.display();
 	}
 	
 	@Test
 	public void moveThreeValuesUp() throws Exception {
-		tableControl.table[1][0] = VALUE_2;
-		tableControl.table[2][0] = VALUE_4;
-		tableControl.table[3][0] = VALUE_8;
+		tableControl.board[1][0] = VALUE_2;
+		tableControl.board[2][0] = VALUE_4;
+		tableControl.board[3][0] = VALUE_8;
 		consoleGrid.display();
 		
 		game.up();
 		
-		assertThat(tableControl.table[0][0], is(VALUE_2));
-		assertThat(tableControl.table[1][0], is(VALUE_4));
-		assertThat(tableControl.table[2][0], is(VALUE_8));
+		assertThat(tableControl.board[0][0], is(VALUE_2));
+		assertThat(tableControl.board[1][0], is(VALUE_4));
+		assertThat(tableControl.board[2][0], is(VALUE_8));
 		consoleGrid.display();
 	}
 	
 	
 	@Test
 	public void fullTableUp() throws Exception {
-		tableControl.table[0][0] = VALUE_2;
-		tableControl.table[1][0] = VALUE_2;
-		tableControl.table[2][0] = VALUE_2;
-		tableControl.table[3][0] = VALUE_2;
+		tableControl.board[0][0] = VALUE_2;
+		tableControl.board[1][0] = VALUE_2;
+		tableControl.board[2][0] = VALUE_2;
+		tableControl.board[3][0] = VALUE_2;
 		
-		tableControl.table[0][1] = VALUE_2;
-		tableControl.table[1][1] = VALUE_2;
-		tableControl.table[2][1] = VALUE_2;
-		tableControl.table[3][1] = VALUE_2;
+		tableControl.board[0][1] = VALUE_2;
+		tableControl.board[1][1] = VALUE_2;
+		tableControl.board[2][1] = VALUE_2;
+		tableControl.board[3][1] = VALUE_2;
 		
-		tableControl.table[0][2] = VALUE_2;
-		tableControl.table[1][2] = VALUE_2;
-		tableControl.table[2][2] = VALUE_2;
-		tableControl.table[3][2] = VALUE_2; 
+		tableControl.board[0][2] = VALUE_2;
+		tableControl.board[1][2] = VALUE_2;
+		tableControl.board[2][2] = VALUE_2;
+		tableControl.board[3][2] = VALUE_2; 
 		
-		tableControl.table[0][3] = VALUE_2;
-		tableControl.table[1][3] = VALUE_2;
-		tableControl.table[2][3] = VALUE_2;
-		tableControl.table[3][3] = VALUE_2;
+		tableControl.board[0][3] = VALUE_2;
+		tableControl.board[1][3] = VALUE_2;
+		tableControl.board[2][3] = VALUE_2;
+		tableControl.board[3][3] = VALUE_2;
 		consoleGrid.display();
 		
 		game.up();
 		
-		assertThat(tableControl.table[0][0], is(VALUE_8));
-		assertThat(tableControl.table[0][1], is(VALUE_8));
-		assertThat(tableControl.table[0][2], is(VALUE_8));
-		assertThat(tableControl.table[0][3], is(VALUE_8));
+		assertThat(tableControl.board[0][0], is(VALUE_8));
+		assertThat(tableControl.board[0][1], is(VALUE_8));
+		assertThat(tableControl.board[0][2], is(VALUE_8));
+		assertThat(tableControl.board[0][3], is(VALUE_8));
 		consoleGrid.display();
 	}
 	
 	@Test
 	public void down() throws Exception {
-		tableControl.table[0][0] = VALUE_2;
-		tableControl.table[1][0] = VALUE_2;
-		tableControl.table[2][0] = VALUE_2;
-		tableControl.table[3][0] = VALUE_2;
+		tableControl.board[0][0] = VALUE_2;
+		tableControl.board[1][0] = VALUE_2;
+		tableControl.board[2][0] = VALUE_2;
+		tableControl.board[3][0] = VALUE_2;
 		
-		tableControl.table[0][1] = VALUE_2;
-		tableControl.table[1][1] = VALUE_2;
-		tableControl.table[2][1] = VALUE_2;
-		tableControl.table[3][1] = VALUE_2;
+		tableControl.board[0][1] = VALUE_2;
+		tableControl.board[1][1] = VALUE_2;
+		tableControl.board[2][1] = VALUE_2;
+		tableControl.board[3][1] = VALUE_2;
 		
-		tableControl.table[0][2] = VALUE_2;
-		tableControl.table[1][2] = VALUE_2;
-		tableControl.table[2][2] = VALUE_2;
-		tableControl.table[3][2] = VALUE_2; 
+		tableControl.board[0][2] = VALUE_2;
+		tableControl.board[1][2] = VALUE_2;
+		tableControl.board[2][2] = VALUE_2;
+		tableControl.board[3][2] = VALUE_2; 
 		
-		tableControl.table[0][3] = VALUE_2;
-		tableControl.table[1][3] = VALUE_2;
-		tableControl.table[2][3] = VALUE_2;
-		tableControl.table[3][3] = VALUE_2;
+		tableControl.board[0][3] = VALUE_2;
+		tableControl.board[1][3] = VALUE_2;
+		tableControl.board[2][3] = VALUE_2;
+		tableControl.board[3][3] = VALUE_2;
 		consoleGrid.display();
 		
 		game.down();
 		
-		assertThat(tableControl.table[3][0], is(VALUE_8));
-		assertThat(tableControl.table[3][1], is(VALUE_8));
-		assertThat(tableControl.table[3][2], is(VALUE_8));
-		assertThat(tableControl.table[3][3], is(VALUE_8));
+		assertThat(tableControl.board[3][0], is(VALUE_8));
+		assertThat(tableControl.board[3][1], is(VALUE_8));
+		assertThat(tableControl.board[3][2], is(VALUE_8));
+		assertThat(tableControl.board[3][3], is(VALUE_8));
 		consoleGrid.display();
 	}
 	
@@ -389,7 +389,7 @@ public class Game2048Test {
 		
 		game.start();
 		
-		assertThat(tableControl.table[0][0], is(VALUE_2));
+		assertThat(tableControl.board[0][0], is(VALUE_2));
 	}
 
 	
@@ -403,8 +403,8 @@ public class Game2048Test {
 		
 		game.start();
 		
-		assertThat(tableControl.table[0][0], is(VALUE_0));
-		assertThat(tableControl.table[0][3], is(VALUE_2));
+		assertThat(tableControl.board[0][0], is(VALUE_0));
+		assertThat(tableControl.board[0][3], is(VALUE_2));
 	}
 	
 	@Test
@@ -412,10 +412,10 @@ public class Game2048Test {
 		
 		prepareTableWith(new Cell(2, 1, 0));
 		
-		tableControl.table[0][1] = VALUE_2;
+		tableControl.board[0][1] = VALUE_2;
 		tableControl.putANewItem();
 		
-		assertThat(tableControl.table[0][2], is(VALUE_2));
+		assertThat(tableControl.board[0][2], is(VALUE_2));
 	}
 	
 	@Test
@@ -423,40 +423,40 @@ public class Game2048Test {
 		
 		prepareTableWith(new Cell(2, 1, 0));
 		
-		tableControl.table[0][0] = VALUE_2;
-		tableControl.table[0][1] = VALUE_2;
-		tableControl.table[0][2] = VALUE_2;
-		tableControl.table[0][3] = VALUE_2;
+		tableControl.board[0][0] = VALUE_2;
+		tableControl.board[0][1] = VALUE_2;
+		tableControl.board[0][2] = VALUE_2;
+		tableControl.board[0][3] = VALUE_2;
 		
 		tableControl.putANewItem();
 		
-		assertThat(tableControl.table[1][0], is(VALUE_2));
+		assertThat(tableControl.board[1][0], is(VALUE_2));
 	}
 	
 	@Test
 	public void dontOverwriteExistingCells() throws Exception {
-		tableControl.table[0][1] = VALUE_2;
-		tableControl.table[0][2] = VALUE_2;
-		tableControl.table[0][3] = VALUE_2;
+		tableControl.board[0][1] = VALUE_2;
+		tableControl.board[0][2] = VALUE_2;
+		tableControl.board[0][3] = VALUE_2;
 		
-		tableControl.table[1][0] = VALUE_2;
-		tableControl.table[1][1] = VALUE_2;
-		tableControl.table[1][2] = VALUE_2;
-		tableControl.table[1][3] = VALUE_2;
+		tableControl.board[1][0] = VALUE_2;
+		tableControl.board[1][1] = VALUE_2;
+		tableControl.board[1][2] = VALUE_2;
+		tableControl.board[1][3] = VALUE_2;
 
-		tableControl.table[2][0] = VALUE_2;
-		tableControl.table[2][1] = VALUE_2;
-		tableControl.table[2][2] = VALUE_2;
-		tableControl.table[2][3] = VALUE_2;
+		tableControl.board[2][0] = VALUE_2;
+		tableControl.board[2][1] = VALUE_2;
+		tableControl.board[2][2] = VALUE_2;
+		tableControl.board[2][3] = VALUE_2;
 		
-		tableControl.table[3][0] = VALUE_2;
-		tableControl.table[3][1] = VALUE_2;
-		tableControl.table[3][2] = VALUE_2;
-		tableControl.table[3][3] = VALUE_2;
+		tableControl.board[3][0] = VALUE_2;
+		tableControl.board[3][1] = VALUE_2;
+		tableControl.board[3][2] = VALUE_2;
+		tableControl.board[3][3] = VALUE_2;
 		
 		tableControl.putANewItem();
 		
-		assertTrue(tableControl.table[0][0].getValue() > 0);
+		assertTrue(tableControl.board[0][0].getValue() > 0);
 	}
 	
 	public void quitWithQ() throws Exception {
@@ -596,9 +596,9 @@ public class Game2048Test {
 	
 	private int countCells() {
 		int found = 0;
-		for (int i = 0; i < tableControl.table.length; i++) {
-			for (int j = 0; j < tableControl.table.length; j++) {
-				if (tableControl.table[i][j].getValue() > 0) found++;
+		for (int i = 0; i < tableControl.board.length; i++) {
+			for (int j = 0; j < tableControl.board.length; j++) {
+				if (tableControl.board[i][j].getValue() > 0) found++;
 			}
 		}
 		return found;
